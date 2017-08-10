@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	bbi "github.com/nimezhu/indexed/bbi"
+	"github.com/nimezhu/indexed/bbi"
 	"github.com/nimezhu/netio"
 )
 

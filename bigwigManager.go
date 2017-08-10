@@ -6,24 +6,24 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	. "github.com/nimezhu/indexed/bbi"
+	"github.com/nimezhu/indexed/bbi"
 	"github.com/nimezhu/netio"
 )
 
-func readBw(uri string) *BigWigReader {
+func readBw(uri string) *bbi.BigWigReader {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
-	bwf := NewBbiReader(reader)
+	bwf := bbi.NewBbiReader(reader)
 	bwf.InitIndex()
 	//log.Println("in reading idx of", uri)
-	bw := NewBigWigReader(bwf)
+	bw := bbi.NewBigWigReader(bwf)
 	return bw
 }
 
 /*BigWigManager implement DataManager Inteface */
 type BigWigManager struct {
 	uriMap map[string]string
-	bwMap  map[string]*BigWigReader
+	bwMap  map[string]*bbi.BigWigReader
 	dbname string
 }
 
@@ -73,7 +73,7 @@ func (m *BigWigManager) ServeTo(router *mux.Router) {
 func NewBigWigManager(uri string, dbname string) *BigWigManager {
 	//prefix := "/" + dbname
 	uriMap := LoadURI(uri)
-	bwmap := make(map[string]*BigWigReader)
+	bwmap := make(map[string]*bbi.BigWigReader)
 	for k, v := range uriMap {
 		bwmap[k] = readBw(v)
 	}
@@ -88,7 +88,7 @@ func NewBigWigManager(uri string, dbname string) *BigWigManager {
 
 func InitBigWigManager(dbname string) *BigWigManager {
 	uriMap := make(map[string]string)
-	bwMap := make(map[string]*BigWigReader)
+	bwMap := make(map[string]*bbi.BigWigReader)
 	m := BigWigManager{
 		uriMap,
 		bwMap,

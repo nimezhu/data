@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	bbi "github.com/nimezhu/indexed/bbi"
+	"github.com/nimezhu/indexed/bbi"
 	"github.com/nimezhu/netio"
 )
 
