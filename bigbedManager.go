@@ -118,6 +118,36 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 		}
 	})
 
+	router.HandleFunc(prefix+"/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		params := mux.Vars(r)
+		id := params["id"]
+		chr := params["chr"]
+		start, _ := strconv.Atoi(params["start"])
+		end, _ := strconv.Atoi(params["end"])
+		binsize, _ := strconv.Atoi(params["binsize"])
+		bw, ok := m.dataMap[id]
+		if !ok {
+			io.WriteString(w, id+" not found")
+		} else {
+			arr := []*bbi.BedBbiQueryType{}
+			if iter, err := bw.QueryBin(chr, start, end, binsize); err == nil {
+				for i := range iter {
+					/*
+						if i.To == 0 {
+							break
+						} //TODO DEBUG THIS FOR STREAM
+					*/
+					arr = append(arr, i)
+					//io.WriteString(w, fmt.Sprintln(i.From, "\t", i.To, "\t", i.Sum))
+				}
+			}
+			j, err := json.Marshal(arr)
+			checkErr(err)
+			io.WriteString(w, string(j))
+		}
+	})
+
 }
 
 func NewBigBedManager(uri string, dbname string) *BigBedManager {
