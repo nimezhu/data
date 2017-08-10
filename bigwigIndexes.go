@@ -85,6 +85,33 @@ func (m *BigWigManager) saveIndexes(fn string, update bool) error {
 	}
 	return nil
 }
+func (m *BigWigManager) LoadIndex(db *bolt.DB, k string) error {
+	db.View(func(tx *bolt.Tx) error {
+		bIdx := tx.Bucket([]byte("_idx"))
+		b := tx.Bucket([]byte(m.dbname))
+		v := b.Get([]byte(k))
+		m.uriMap[k] = string(v)
+		idx := bIdx.Get(v)
+		reader, err := netio.NewReadSeeker(string(v))
+		if err != nil {
+			return err
+		}
+		bwf := bbi.NewBbiReader(reader)
+		bwf.ReadIndex(bytes.NewReader(idx))
+		bwr := bbi.NewBigWigReader(bwf)
+		m.bwMap[string(k)] = bwr
+		return nil
+	})
+	return nil
+}
+func (m *BigWigManager) UnloadIndex(k string) error {
+	_, ok := m.uriMap[k]
+	if ok {
+		delete(m.uriMap, k)
+		delete(m.bwMap, k)
+	}
+	return nil
+}
 func (m *BigWigManager) LoadIndexes(fn string) error {
 	db, err := bolt.Open(fn, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -96,12 +123,10 @@ func (m *BigWigManager) LoadIndexes(fn string) error {
 		b := tx.Bucket([]byte(m.dbname))
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			fmt.Println(string(k))
 			m.uriMap[string(k)] = string(v)
 			idx := bIdx.Get(v)
 			reader, err := netio.NewReadSeeker(string(v))
 			if err != nil {
-				panic(err)
 				return err
 			}
 			bwf := bbi.NewBbiReader(reader)

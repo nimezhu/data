@@ -69,6 +69,34 @@ func (m *BigBedManager) saveIndexes(fn string, update bool) error {
 	}
 	return nil
 }
+
+func (m *BigBedManager) LoadIndex(db *bolt.DB, k string) error {
+	db.View(func(tx *bolt.Tx) error {
+		bIdx := tx.Bucket([]byte("_idx"))
+		b := tx.Bucket([]byte(m.dbname))
+		v := b.Get([]byte(k))
+		m.uriMap[k] = string(v)
+		idx := bIdx.Get(v)
+		reader, err := netio.NewReadSeeker(string(v))
+		if err != nil {
+			return err
+		}
+		bwf := bbi.NewBbiReader(reader)
+		bwf.ReadIndex(bytes.NewReader(idx))
+		bwr := bbi.NewBigBedReader(bwf)
+		m.dataMap[string(k)] = bwr
+		return nil
+	})
+	return nil
+}
+func (m *BigBedManager) UnloadIndex(k string) error {
+	_, ok := m.uriMap[k]
+	if ok {
+		delete(m.uriMap, k)
+		delete(m.dataMap, k)
+	}
+	return nil
+}
 func (m *BigBedManager) LoadIndexes(fn string) error {
 	db, err := bolt.Open(fn, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
