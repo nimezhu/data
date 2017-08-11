@@ -30,7 +30,9 @@ func LoadURI(uri string) map[string]string {
 			uriMap[record[0]] = record[1]
 		}
 	} else {
-		uriMap["default"] = uri
+		if len(uri) > 0 {
+			uriMap["default"] = uri
+		}
 	}
 	return uriMap
 }
