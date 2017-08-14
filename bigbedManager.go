@@ -91,7 +91,7 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 		w.Write(jsonHic)
 	})
 
-	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/list/{id}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
 		id := params["id"]
@@ -104,7 +104,7 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 		}
 	})
 
-	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/get/{id}/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
 		id := params["id"]
@@ -118,7 +118,7 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 		}
 	})
 
-	router.HandleFunc(prefix+"/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/getbin/{id}/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
 		id := params["id"]

@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -21,9 +22,10 @@ type DataManager interface {
 */
 
 type TrackManager struct {
-	id       string
-	uriMap   map[string]string
-	managers map[string]DataManager
+	id        string
+	uriMap    map[string]string
+	formatMap map[string]string
+	managers  map[string]DataManager
 }
 
 func NewTrackManager(uri string, dbname string) *TrackManager {
@@ -36,20 +38,22 @@ func NewTrackManager(uri string, dbname string) *TrackManager {
 }
 func InitTrackManager(dbname string) *TrackManager {
 	uriMap := make(map[string]string)
+	formatMap := make(map[string]string)
 	dataMap := make(map[string]DataManager)
 	m := TrackManager{
 		dbname,
 		uriMap,
+		formatMap,
 		dataMap,
 	}
 	return &m
 }
 func newManager(prefix string, format string) DataManager {
 	if format == "bigwig" {
-		return InitBigWigManager(prefix + ".bw")
+		return InitBigWigManager(prefix + ".bigwig")
 	}
 	if format == "bigbed" {
-		return InitBigBedManager(prefix + ".bb")
+		return InitBigBedManager(prefix + ".bigbed")
 	}
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
@@ -62,6 +66,7 @@ func (m *TrackManager) AddURI(uri string, key string) error {
 		m.managers[format] = newManager(m.id, format)
 	}
 	m.managers[format].AddURI(uri, key)
+	m.formatMap[key] = format
 	m.uriMap[key] = uri
 	return nil
 }
@@ -82,13 +87,17 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
-	router.HandleFunc(prefix+"/{id}/{code:.*}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/{cmd}/{id}/{code:.*}", func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
-		//id := params["id"]
+		cmd := params["cmd"]
+		id := params["id"]
 		code := params["code"]
-		w.Write([]byte(code))
+		format, _ := m.formatMap[id]
+		fmt.Println("format", format, "id", id)
+		//w.Write([]byte(code))
 		//TODO redirect with format
-		// http.Redirect(w, r, code, 301)
+		url := prefix + "." + format + "/" + cmd + "/" + id + "/" + code
+		http.Redirect(w, r, url, http.StatusPermanentRedirect)
 	})
 	for _, v := range m.managers {
 		v.ServeTo(router)
