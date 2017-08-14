@@ -87,16 +87,25 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
-	router.HandleFunc(prefix+"/{cmd}/{id}/{code:.*}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		a := make([]map[string]string, 0)
+		for k, _ := range m.uriMap {
+			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
+		}
+		jsonHic, _ := json.Marshal(a)
+		w.Write(jsonHic)
+	})
+	router.HandleFunc(prefix+"/{id}/{cmd:.*}", func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		cmd := params["cmd"]
 		id := params["id"]
-		code := params["code"]
 		format, _ := m.formatMap[id]
 		fmt.Println("format", format, "id", id)
 		//w.Write([]byte(code))
 		//TODO redirect with format
-		url := prefix + "." + format + "/" + cmd + "/" + id + "/" + code
+		url := prefix + "." + format + "/" + id + "/" + cmd
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		http.Redirect(w, r, url, http.StatusPermanentRedirect)
 	})
 	for _, v := range m.managers {
