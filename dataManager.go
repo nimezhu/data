@@ -55,6 +55,8 @@ func newDataManager(dbname string, uri string, format string) DataManager {
 		return NewTabixManager(uri, dbname)
 	case "bigbed":
 		return NewBigBedManager(uri, dbname)
+	case "track":
+		return NewTrackManager(uri, dbname)
 	}
 	return nil
 }
@@ -68,6 +70,8 @@ func initDataManager(dbname string, format string) DataManager {
 		return InitHicManager(dbname)
 	case "map":
 		return InitMapManager(dbname)
+	case "track":
+		return InitTrackManager(dbname)
 	}
 	return nil
 }
