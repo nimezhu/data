@@ -18,6 +18,7 @@ func LoadURI(uri string) map[string]string {
 		checkErr(err)
 		r := csv.NewReader(reader)
 		r.Comma = '\t'
+		r.Comment = '#'
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
