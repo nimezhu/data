@@ -157,7 +157,6 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		unit, _ := strconv.Atoi(params["unit"])
 		m, err := hicMap[id].QueryTwoNormMat(chr, start, end, chr2, start2, end2, resIdx, norm, unit)
 		if err == nil {
-
 			if format == "bin" {
 				w.Header().Set("Content-Type", "application/octet-stream")
 				a := matrixToBytes(m)
