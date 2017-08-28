@@ -2,10 +2,13 @@ package data
 
 import (
 	"compress/gzip"
+	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/nimezhu/netio"
 )
 
@@ -19,7 +22,8 @@ type CytoBand struct {
 	data map[string][]Band
 }
 type CytoBandManager struct {
-	data map[string]*CytoBand
+	prefix string
+	data   map[string]*CytoBand
 }
 
 /*
@@ -106,4 +110,29 @@ func (m *CytoBandManager) Move(key1 string, key2 string) bool {
 		delete(m.data, key1)
 	}
 	return ok
+}
+func (m *CytoBandManager) ServeTo(router *mux.Router) {
+	router.HandleFunc("/"+m.prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id := params["id"]
+		if d, ok := m.data[id]; ok {
+			l := make([]string, 0, 100)
+			for k, _ := range d.data {
+				l = append(l, k)
+			}
+			j, _ := json.Marshal(l)
+			w.Write(j)
+		}
+	})
+	router.HandleFunc("/"+m.prefix+"/{id}/get/{chr}", func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id := params["id"]
+		chr := params["chr"]
+		if d, ok := m.data[id]; ok {
+			if d2, ok2 := d.data[chr]; ok2 {
+				j, _ := json.Marshal(d2)
+				w.Write(d2)
+			}
+		}
+	})
 }
