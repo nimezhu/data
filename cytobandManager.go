@@ -26,6 +26,11 @@ type CytoBandManager struct {
 	data   map[string]*CytoBand
 }
 
+func NewCytoBandManager(id string) *CytoBandManager {
+	m := &CytoBandManager{id, make(map[string]*CytoBand)}
+	return m
+}
+
 /*
 type DataManager interface {
 	AddURI(uri string, key string) error
@@ -54,6 +59,7 @@ func parseCytoBand(txt string) (CytoBand, error) {
 			m[t[0]] = append(m[t[0]], Band{start, end, t[3], t[4]})
 		}
 	}
+	cytoband.data = m
 	return cytoband, nil
 }
 func (m *CytoBandManager) AddURI(uri string, key string) error {
@@ -131,7 +137,7 @@ func (m *CytoBandManager) ServeTo(router *mux.Router) {
 		if d, ok := m.data[id]; ok {
 			if d2, ok2 := d.data[chr]; ok2 {
 				j, _ := json.Marshal(d2)
-				w.Write(d2)
+				w.Write(j)
 			}
 		}
 	})
