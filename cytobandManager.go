@@ -13,10 +13,11 @@ import (
 )
 
 type Band struct {
-	Start int
-	End   int
-	Id    string
-	Value string
+	Chr   string `json:"chr"`
+	Start int    `json:"start"`
+	End   int    `json:"end"`
+	Id    string `json:"id"`
+	Value string `json:"value"`
 }
 type CytoBand struct {
 	data map[string][]Band
@@ -56,7 +57,7 @@ func parseCytoBand(txt string) (CytoBand, error) {
 			}
 			start, _ := strconv.Atoi(t[1])
 			end, _ := strconv.Atoi(t[2])
-			m[t[0]] = append(m[t[0]], Band{start, end, t[3], t[4]})
+			m[t[0]] = append(m[t[0]], Band{t[0], start, end, t[3], t[4]})
 		}
 	}
 	cytoband.data = m
