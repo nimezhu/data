@@ -57,6 +57,8 @@ func newDataManager(dbname string, uri string, format string) DataManager {
 		return NewBigBedManager(uri, dbname)
 	case "track":
 		return NewTrackManager(uri, dbname)
+	case "image":
+		return NewTabixImageManager(uri, dbname)
 	}
 	return nil
 }

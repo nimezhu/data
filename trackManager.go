@@ -58,6 +58,9 @@ func newManager(prefix string, format string) DataManager {
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
 	}
+	if format == "image" {
+		return InitTabixImageManager(prefix + ".image")
+	}
 	return nil
 }
 func (m *TrackManager) AddURI(uri string, key string) error {

@@ -3,12 +3,14 @@ package image
 
 import (
 	"crypto/sha256"
+	"log"
 	"net/http"
 	"runtime"
 	"time"
 
 	"github.com/disintegration/gift"
 	"github.com/gorilla/mux"
+	"github.com/howeyc/fsnotify"
 	"github.com/pierrre/imageserver"
 	imageserver_cache "github.com/pierrre/imageserver/cache"
 	imageserver_cache_memory "github.com/pierrre/imageserver/cache/memory"
@@ -35,7 +37,31 @@ var (
 )
 
 func AddTo(r *mux.Router, prefix string, root string) {
-	r.Handle("/"+prefix+"/{id}", http.StripPrefix("/"+prefix, newImageHTTPHandler(root)))
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = watcher.Watch(root)
+	go func() {
+		for {
+			select {
+			case ev := <-watcher.Event:
+				log.Println("event:", ev)
+			case err := <-watcher.Error:
+				log.Println("error:", err)
+			}
+		}
+	}()
+	if err != nil {
+		log.Fatal(err)
+	}
+	r.HandleFunc("/"+prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("cmd:ls"))
+	})
+	r.HandleFunc("/"+prefix+"/{id:.*}/ls", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("cmd:ls"))
+	})
+	r.Handle("/"+prefix+"/{id:.*}", http.StripPrefix("/"+prefix, newImageHTTPHandler(root)))
 	r.Handle("/favicon.ico", http.NotFoundHandler())
 }
 func newImageHTTPHandler(root string) http.Handler {
