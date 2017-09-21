@@ -55,6 +55,9 @@ func newManager(prefix string, format string) DataManager {
 	if format == "bigbed" {
 		return InitBigBedManager(prefix + ".bigbed")
 	}
+	if format == "bigbedLarge" {
+		return InitBigBedManager(prefix + ".bigbedLarge")
+	}
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
 	}
@@ -65,11 +68,11 @@ func newManager(prefix string, format string) DataManager {
 }
 func (m *TrackManager) AddURI(uri string, key string) error {
 	format, _ := indexed.Magic(uri)
+	m.formatMap[key] = format
 	if _, ok := m.managers[format]; !ok {
 		m.managers[format] = newManager(m.id, format)
 	}
 	m.managers[format].AddURI(uri, key)
-	m.formatMap[key] = format
 	m.uriMap[key] = uri
 	return nil
 }
