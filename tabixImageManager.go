@@ -7,10 +7,12 @@ import (
 	"net/http"
 	path "path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/brentp/bix"
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/data/image"
+	"github.com/nimezhu/netio"
 )
 
 /*  Implement DataManager
@@ -30,10 +32,75 @@ type DataManager interface {
  * /images/*.png
  */
 type TabixImageManager struct {
-	uriMap  map[string]string
-	dataMap map[string]*bix.Bix
-	dbname  string
-	root    string
+	uriMap         map[string]string
+	dataMap        map[string]*bix.Bix
+	imageToRegions map[string]string
+	dbname         string
+	root           string
+}
+type Bed4 struct {
+	chr   string
+	start int
+	end   int
+	name  string
+}
+
+func (b Bed4) Chr() string {
+	return b.chr
+}
+
+func (b Bed4) Start() int {
+	return b.start
+}
+func (b Bed4) End() int {
+	return b.end
+}
+
+type ShortBed interface {
+	Chr() string
+	Start() int
+	End() int
+}
+
+func regionText(b ShortBed) string {
+	s := strconv.Itoa(b.Start())
+	e := strconv.Itoa(b.End())
+	return b.Chr() + ":" + s + "-" + e
+}
+func regionsText(bs []Bed4) string { //TODO interface array function
+	r := make([]string, len(bs))
+	for i, v := range bs {
+		r[i] = regionText(v)
+	}
+	return strings.Join(r, ",")
+}
+
+func (T *TabixImageManager) addBeds(uri string) error {
+	f, err := netio.ReadAll(uri)
+	if err != nil {
+		return err
+	}
+	m := make(map[string][]Bed4)
+	lines := strings.Split(string(f), "\n")
+	for _, line := range lines {
+		if len(line) == 0 {
+			continue
+		}
+		w := strings.Split(string(line), "\t")
+		start, _ := strconv.Atoi(w[1])
+		end, _ := strconv.Atoi(w[2])
+		if _, ok := m[w[3]]; ok {
+			m[w[3]] = append(m[w[3]], Bed4{w[0], start, end, w[3]})
+		} else {
+			m[w[3]] = []Bed4{Bed4{w[0], start, end, w[3]}}
+		}
+	}
+
+	for k, v := range m {
+		T.imageToRegions[k] = regionsText(v)
+	}
+
+	return nil
 }
 
 func (T *TabixImageManager) AddURI(uri string, key string) error {
@@ -46,6 +113,7 @@ func (T *TabixImageManager) AddURI(uri string, key string) error {
 	if T.root == "" {
 		T.root = path.Dir(uri)
 	}
+	T.addBeds(uri)
 	return nil
 }
 func (m *TabixImageManager) Del(key string) error {
@@ -105,6 +173,25 @@ func (T *TabixImageManager) ServeTo(router *mux.Router) {
 			fmt.Println("can not find id", id)
 		}
 	})
+	router.HandleFunc(prefix+"/getpos/{id}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		params := mux.Vars(r)
+		id := params["id"]
+		if v, ok := T.imageToRegions[id]; ok {
+			io.WriteString(w, v)
+		} else {
+			io.WriteString(w, "[]")
+		}
+
+	})
+	router.HandleFunc(prefix+"/images/ls", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		io.WriteString(w, "id\tpos\n")
+		for k, v := range T.imageToRegions {
+			s := fmt.Sprintf("%s\t%s\n", k, v)
+			io.WriteString(w, s)
+		}
+	})
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
@@ -136,6 +223,7 @@ func InitTabixImageManager(dbname string) *TabixImageManager {
 	m := TabixImageManager{
 		uriMap,
 		dataMap,
+		make(map[string]string),
 		dbname,
 		"",
 	}
@@ -160,6 +248,7 @@ func NewTabixImageManager(uri string, dbname string) *TabixImageManager {
 	m := TabixImageManager{
 		uriMap,
 		dataMap,
+		make(map[string]string),
 		dbname,
 		root,
 	}
