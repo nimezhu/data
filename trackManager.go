@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,7 +26,7 @@ type TrackManager struct {
 	id        string
 	uriMap    map[string]string
 	formatMap map[string]string
-	managers  map[string]DataManager
+	managers  map[string]Manager
 }
 
 func NewTrackManager(uri string, dbname string) *TrackManager {
@@ -39,7 +40,7 @@ func NewTrackManager(uri string, dbname string) *TrackManager {
 func InitTrackManager(dbname string) *TrackManager {
 	uriMap := make(map[string]string)
 	formatMap := make(map[string]string)
-	dataMap := make(map[string]DataManager)
+	dataMap := make(map[string]Manager)
 	m := TrackManager{
 		dbname,
 		uriMap,
@@ -48,7 +49,7 @@ func InitTrackManager(dbname string) *TrackManager {
 	}
 	return &m
 }
-func newManager(prefix string, format string) DataManager {
+func newManager(prefix string, format string) Manager {
 	if format == "bigwig" {
 		return InitBigWigManager(prefix + ".bigwig")
 	}
@@ -63,6 +64,19 @@ func newManager(prefix string, format string) DataManager {
 	}
 	if format == "image" {
 		return InitTabixImageManager(prefix + ".image")
+	}
+	return nil
+}
+func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	format, _ := indexed.MagicReadSeeker(reader)
+	if format == "hic" || format == "bigwig" || format == "bigbed" {
+		reader.Seek(0, 0)
+		if _, ok := m.managers[format]; !ok {
+			m.managers[format] = newManager(m.id, format)
+		}
+		m.managers[format].Add(key, reader, uri)
+		m.formatMap[key] = format
+		m.uriMap[key] = uri
 	}
 	return nil
 }

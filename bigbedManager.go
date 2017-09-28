@@ -29,6 +29,14 @@ type BigBedManager struct {
 	dbname  string
 }
 
+func (m *BigBedManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	m.uriMap[key] = uri
+	bwf := bbi.NewBbiReader(reader)
+	bwf.InitIndex()
+	bw := bbi.NewBigBedReader(bwf)
+	m.dataMap[key] = bw
+	return nil
+}
 func (bb *BigBedManager) AddURI(uri string, key string) error {
 	reader, err := netio.NewReadSeeker(uri)
 	if err != nil {

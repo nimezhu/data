@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -102,7 +103,9 @@ func (T *TabixImageManager) addBeds(uri string) error {
 
 	return nil
 }
-
+func (m *TabixImageManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	return errors.New("TODO")
+}
 func (T *TabixImageManager) AddURI(uri string, key string) error {
 	b, err := bix.New(uri) //path to file now; not working for http, strict to current folder
 	if err != nil {
