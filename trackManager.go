@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -69,6 +70,7 @@ func newManager(prefix string, format string) Manager {
 }
 func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	format, _ := indexed.MagicReadSeeker(reader)
+	log.Println("adding ", key, uri)
 	if format == "hic" || format == "bigwig" || format == "bigbed" {
 		reader.Seek(0, 0)
 		if _, ok := m.managers[format]; !ok {
@@ -144,12 +146,11 @@ func (m *TrackManager) Get(key string) (string, bool) {
 	v, ok := m.uriMap[key]
 	return v, ok
 }
-func (m *TrackManager) Move(key1 string, key2 string) bool {
-
+func (m *TrackManager) Move(key1 string, key2 string) bool { //TODO
 	if v, ok := m.uriMap[key1]; ok {
 		m.uriMap[key2] = v
 		delete(m.uriMap, key1)
-		format, _ := indexed.Magic(v)
+		format, _ := indexed.Magic(v) // TODO Fix this with ReadSeeker.
 		m.managers[format].Move(key1, key2)
 		return true
 	}

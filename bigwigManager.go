@@ -30,6 +30,7 @@ type BigWigManager struct {
 
 func (m *BigWigManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
+	log.Println("adding in bigwig", key, uri)
 	bwf := bbi.NewBbiReader(reader)
 	bwf.InitIndex()
 	//log.Println("in reading idx of", uri)
