@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
@@ -27,6 +28,15 @@ type BigWigManager struct {
 	dbname string
 }
 
+func (m *BigWigManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	m.uriMap[key] = uri
+	bwf := bbi.NewBbiReader(reader)
+	bwf.InitIndex()
+	//log.Println("in reading idx of", uri)
+	bw := bbi.NewBigWigReader(bwf)
+	m.bwMap[key] = bw
+	return nil
+}
 func (m *BigWigManager) AddURI(uri string, key string) error {
 	m.uriMap[key] = uri
 	m.bwMap[key] = readBw(uri)

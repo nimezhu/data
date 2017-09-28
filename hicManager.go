@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
@@ -17,6 +18,15 @@ type HicManager struct {
 	dbname  string
 }
 
+func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	vhic, err := hic.DataReader(reader)
+	if err != nil {
+		return err
+	}
+	m.uriMap[key] = uri
+	m.dataMap[key] = vhic
+	return nil
+}
 func (m *HicManager) AddURI(uri string, key string) error {
 	m.uriMap[key] = uri
 	m.dataMap[key] = readhic(uri)

@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,6 +22,10 @@ type DataManager interface {
 	List() []string
 	Get(string) (string, bool)
 	Move(key1 string, key2 string) bool
+}
+type Manager interface {
+	DataManager
+	Add(key string, reader io.ReadSeeker, uri string) error
 }
 type Entry struct {
 	Name string

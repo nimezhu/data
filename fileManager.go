@@ -18,6 +18,15 @@ type FileManager struct {
 	bufferMap map[string][]byte
 }
 
+/*
+func (m *FileManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	_, ok := m.uri[key]
+	if ok {
+		return errors.New("duplicated key string")
+	}
+	m.uri[key] = uri
+}
+*/
 func (m *FileManager) AddURI(uri string, key string) error {
 	_, ok := m.uri[key]
 	if ok {
