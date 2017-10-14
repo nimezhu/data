@@ -7,7 +7,7 @@ import (
 	"math"
 
 	"github.com/gonum/matrix/mat64"
-	. "github.com/nimezhu/stream"
+	. "github.com/nimezhu/netio"
 )
 
 func Float64frombytes(bytes []byte) float64 {
