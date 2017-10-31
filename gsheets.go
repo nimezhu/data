@@ -155,7 +155,6 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 		for id, loc := range s {
 			uri := path.Join(root, loc) //TODO
 			if _, err := os.Stat(uri); err == nil {
-				log.Println("adding", uri, id)
 				a.AddURI(uri, id)
 			} else {
 				log.Println("WARNING!!! cannot reading", uri, id)
