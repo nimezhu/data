@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -222,14 +223,27 @@ func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 /* Load: load uri to router
  *			 uri ext is json or tsv.
  */
+
 func Load(uri string, router *mux.Router) map[string]DataManager {
 	var managers map[string]DataManager
-	ext := path.Ext(uri)
-	if ext == ".json" {
-		managers = ReadJsonToManagers(uri, router)
+	http, _ := regexp.Compile("^http://")
+	https, _ := regexp.Compile("^https://")
+
+	if len(uri) == len("1DEvA94QkN1KZQT51IYOOcIvGL2Ux7Qwqe5IpE9Pe1N8") { //GOOGLE SHEET ID ?
+		if _, err := os.Stat(uri); os.IsNotExist(err) {
+			if !http.MatchString(uri) && !https.MatchString(uri) {
+				managers = AddGSheets(uri, "client_secret.json", router) //TODO handle client_secret json variable.
+			}
+		}
 	} else {
-		managers = AddDataManagers(uri, router)
+		ext := path.Ext(uri)
+		if ext == ".json" {
+			managers = ReadJsonToManagers(uri, router)
+		} else {
+			managers = AddDataManagers(uri, router)
+		}
 	}
+
 	return managers
 }
 
