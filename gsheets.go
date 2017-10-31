@@ -12,6 +12,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
@@ -108,6 +109,35 @@ func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int
 	return r
 }
 
+type IndexEntry struct {
+	Id   string
+	Type string
+	Nc   int
+	Vc   int
+}
+
+func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
+	id := "Index"
+	readRange := id + "!A2:D"
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+	}
+	a := make([]IndexEntry, len(resp.Values))
+	if len(resp.Values) > 0 {
+		for i, row := range resp.Values {
+			// Print columns A and E, which correspond to indices 0 and 4.
+			//r[row[nameIdx].(string)] = row[valueIdx].(string)
+			nc, _ := strconv.Atoi(row[2].(string))
+			vc, _ := strconv.Atoi(row[3].(string))
+			a[i] = IndexEntry{row[0].(string), row[1].(string), nc, vc}
+		}
+	} else {
+		fmt.Print("No data found.")
+	}
+	return a
+}
+
 func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Router) map[string]DataManager {
 	m := map[string]DataManager{}
 	entry := []string{}
@@ -134,16 +164,25 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 		log.Fatalf("Unable to retrieve Sheets Client %v", err)
 	}
 	c := readSheet("Config", srv, spreadsheetId, 0, 1)
-	index := readSheet("Index", srv, spreadsheetId, 0, 1)
+	index := readIndex(srv, spreadsheetId)
 	root, _ := c["root"]
-	server, _ := c["server"]
-	router.HandleFunc("/server/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("{ \"main\":\"" + server + "\"}"))
-	}) //TODO
-	for k, v := range index {
-		fmt.Println("sheet:", k)  //TODO
-		fmt.Println("format:", v) //TODO
-		s := readSheet(k, srv, spreadsheetId, 1, 6)
+	//server, _ := c["server"]
+	/*
+		router.HandleFunc("/server/ls", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("{ \"main\":\"" + server + "\"}"))
+		}) //TODO FIX
+	*/
+	for _, e := range index {
+		k := e.Id
+		v := e.Type
+		if k[0] == '#' {
+			continue
+		}
+		fmt.Println("sheet:", k) //TODO
+		fmt.Println("format:", v)
+		//TODO
+		fmt.Println(e.Nc, e.Vc)
+		s := readSheet(k, srv, spreadsheetId, e.Nc-1, e.Vc-1) //TODO GET FROM INDEX
 		format := v
 		a := initDataManager(k, format) //TODO
 		jdata = append(jdata, map[string]string{
@@ -152,12 +191,19 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 			"format": format,
 		})
 		entry = append(entry, k)
-		for id, loc := range s {
-			uri := path.Join(root, loc) //TODO
-			if _, err := os.Stat(uri); err == nil {
-				a.AddURI(uri, id)
-			} else {
-				log.Println("WARNING!!! cannot reading", uri, id)
+		fmt.Println(s)
+		if v == "map" {
+			for k0, v0 := range s {
+				a.AddURI(v0, k0)
+			}
+		} else {
+			for id, loc := range s {
+				uri := path.Join(root, loc) //TODO
+				if _, err := os.Stat(uri); err == nil {
+					a.AddURI(uri, id)
+				} else {
+					log.Println("WARNING!!! cannot reading", uri, id)
+				}
 			}
 		}
 		a.ServeTo(router)
