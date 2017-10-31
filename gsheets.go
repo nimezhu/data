@@ -136,6 +136,10 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 	c := readSheet("Config", srv, spreadsheetId, 0, 1)
 	index := readSheet("Index", srv, spreadsheetId, 0, 1)
 	root, _ := c["root"]
+	server, _ := c["server"]
+	router.HandleFunc("/server/ls", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("{ \"main\":\"" + server + "\"}"))
+	}) //TODO
 	for k, v := range index {
 		fmt.Println("sheet:", k)  //TODO
 		fmt.Println("format:", v) //TODO
@@ -154,7 +158,7 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 				log.Println("adding", uri, id)
 				a.AddURI(uri, id)
 			} else {
-				log.Println("cannot reading", uri, id)
+				log.Println("WARNING!!! cannot reading", uri, id)
 			}
 		}
 		a.ServeTo(router)
