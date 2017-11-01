@@ -128,7 +128,7 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 		//TODO redirect with format
 		url := prefix + "." + format + "/" + id + "/" + cmd
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		http.Redirect(w, r, url, http.StatusPermanentRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	})
 	for _, v := range m.managers {
 		v.ServeTo(router)
