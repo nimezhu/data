@@ -1,9 +1,11 @@
 package data
 
 import (
+	"path"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/nimezhu/data/image"
 )
 
 // No Data Structure implemented , leave interface for future for large data set.
@@ -57,7 +59,10 @@ func getRootDir(dirs []string) string {
 /* AddImagesTo:
  *   images should install as local files.
  *   TODO: uri is web link?
+ *         how to add names ? redirect?
+ *         rename tableName to tableName.image
  */
-func AddImagesTo(names []string, uris []string, tableName string, dataRoot string, router *mux.Router) {
-
+func AddImagesTo(uris []string, tableName string, dataRoot string, router *mux.Router) {
+	root := path.Join(dataRoot, getRootDir(uris))
+	image.AddTo(router, tableName, root)
 }
