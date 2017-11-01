@@ -239,6 +239,8 @@ func Load(uri string, router *mux.Router) map[string]DataManager {
 		ext := path.Ext(uri)
 		if ext == ".json" {
 			managers = ReadJsonToManagers(uri, router)
+		} else if ext == ".xlsx" {
+			managers = AddSheets(uri, router)
 		} else {
 			managers = AddDataManagers(uri, router)
 		}
