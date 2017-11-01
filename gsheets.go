@@ -12,6 +12,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -142,6 +143,8 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 	m := map[string]DataManager{}
 	entry := []string{}
 	jdata := []map[string]string{}
+	httpP, _ := regexp.Compile("^http://")
+	httpsP, _ := regexp.Compile("^https://")
 
 	ctx := context.Background()
 
@@ -198,12 +201,19 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 			}
 		} else {
 			for id, loc := range s {
-				uri := path.Join(root, loc) //TODO
-				if _, err := os.Stat(uri); err == nil {
+				var uri string
+				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
+					uri = loc
 					a.AddURI(uri, id)
 				} else {
-					log.Println("WARNING!!! cannot reading", uri, id)
+					uri = path.Join(root, loc) //TODO
+					if _, err := os.Stat(uri); err == nil {
+						a.AddURI(uri, id)
+					} else {
+						log.Println("WARNING!!! cannot reading", uri, id)
+					}
 				}
+
 			}
 		}
 		a.ServeTo(router)

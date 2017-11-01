@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/netio"
@@ -23,6 +24,8 @@ func AddSheets(uri string, router *mux.Router) map[string]DataManager {
 	m := map[string]DataManager{}
 	entry := []string{}
 	jdata := []map[string]string{}
+	httpP, _ := regexp.Compile("^http://")
+	httpsP, _ := regexp.Compile("^https://")
 	/* TODO */
 	r, err := netio.NewReadSeeker(uri)
 	logErr(err)
@@ -85,12 +88,19 @@ func AddSheets(uri string, router *mux.Router) map[string]DataManager {
 				for _, r := range vsheet.Rows[1:] {
 					id := r.Cells[a.Nc-1].String()
 					loc := r.Cells[a.Vc-1].String()
-					uri := path.Join(root, loc) //TODO
-					if _, err := os.Stat(uri); err == nil {
+					var uri string
+					if httpP.MatchString(loc) || httpsP.MatchString(loc) {
+						uri = loc
 						m0.AddURI(uri, id)
 					} else {
-						log.Println("WARNING!!! cannot reading", uri, id)
+						uri = path.Join(root, loc) //TODO
+						if _, err := os.Stat(uri); err == nil {
+							m0.AddURI(uri, id)
+						} else {
+							log.Println("WARNING!!! cannot reading", uri, id)
+						}
 					}
+
 				}
 			}
 			fmt.Println(m0.List())
