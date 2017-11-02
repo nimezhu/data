@@ -120,6 +120,7 @@ func loadIndex(index DataIndex, router *mux.Router) error {
 	return err
 }
 
+/*TODO SHORT */
 func loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	switch format {
 	case "file":
