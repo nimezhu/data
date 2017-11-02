@@ -51,7 +51,7 @@ func smartParseURI(uri string) ([]DataIndex, error) {
 	} else {
 		ext := path.Ext(uri)
 		if ext == ".json" {
-			return nil, errors.New("TODO") //not for obsoleted version
+			return parseJson(uri) //not for obsoleted version
 		} else if ext == ".xlsx" {
 			return parseXls(uri)
 		} else {
