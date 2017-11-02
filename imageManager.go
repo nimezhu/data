@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"path"
 	"strings"
 
@@ -67,10 +68,50 @@ func AddImagesTo(uris []string, tableName string, dataRoot string, router *mux.R
 	image.AddTo(router, tableName, root)
 }
 
+// BinindexImageManager is a TabixImageManager but in memory
+// partially implement data manager interface function.
+// ServeTo(*mux.Router) //add handlers to router
 type BinindexImageManager struct {
-	uriMap         map[string]string
+	uriMap         map[string]string //file name
 	dataMap        *BinIndexMap
-	imageToRegions map[string]string
-	dbname         string
-	root           string
+	imageToRegions map[string]string //associate name to regions
+	dbname         string            //sheet tab name
+	root           string            //need to calc
+}
+
+func (T *BinindexImageManager) addBeds(uri string) error {
+	/*
+		f, err := netio.ReadAll(uri)
+		if err != nil {
+			return err
+		}
+		m := make(map[string][]Bed4)
+		lines := strings.Split(string(f), "\n")
+		for _, line := range lines {
+			if len(line) == 0 {
+				continue
+			}
+			w := strings.Split(string(line), "\t")
+			start, _ := strconv.Atoi(w[1])
+			end, _ := strconv.Atoi(w[2])
+			if _, ok := m[w[3]]; ok {
+				m[w[3]] = append(m[w[3]], Bed4{w[0], start, end, w[3]})
+			} else {
+				m[w[3]] = []Bed4{Bed4{w[0], start, end, w[3]}}
+			}
+		}
+
+		for k, v := range m {
+			T.imageToRegions[k] = regionsText(v)
+		}
+	*/
+	return nil
+}
+func (B *BinindexImageManager) AddURI(k string, v string) error {
+	return errors.New("not implemented")
+}
+func (B *BinindexImageManager) Del(k string) error {
+	return errors.New("not implemented")
+}
+func (B *BinindexImageManager) ServeTo(router *mux.Router) {
 }

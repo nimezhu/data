@@ -20,10 +20,20 @@ import (
 	"github.com/nimezhu/netio"
 )
 
+type DataRouter interface {
+	ServeTo(*mux.Router)
+}
+type DataLoader interface {
+	Load(interface{}) error
+}
+type DataServer interface {
+	DataRouter
+	DataLoader
+}
 type DataManager interface {
+	DataRouter
 	AddURI(uri string, key string) error
 	Del(string) error
-	ServeTo(*mux.Router)
 	List() []string
 	Get(string) (string, bool)
 	Move(key1 string, key2 string) bool

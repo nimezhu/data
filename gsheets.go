@@ -187,7 +187,7 @@ func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Route
 		fmt.Println(e.Nc, e.Vc)
 		s := readSheet(k, srv, spreadsheetId, e.Nc-1, e.Vc-1) //TODO GET FROM INDEX
 		format := v
-		a := initDataManager(k, format) //TODO
+		a := initDataManager(k, format) //TODO as router not datamanager
 		jdata = append(jdata, map[string]string{
 			"dbname": k,
 			"uri":    spreadsheetId + ":" + k,
