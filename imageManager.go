@@ -66,3 +66,11 @@ func AddImagesTo(uris []string, tableName string, dataRoot string, router *mux.R
 	root := path.Join(dataRoot, getRootDir(uris))
 	image.AddTo(router, tableName, root)
 }
+
+type BinindexImageManager struct {
+	uriMap         map[string]string
+	dataMap        *BinIndexMap
+	imageToRegions map[string]string
+	dbname         string
+	root           string
+}
