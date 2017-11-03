@@ -52,6 +52,7 @@ func parseGSheet(spreadsheetId string) ([]DataIndex, error) {
 		fmt.Println("format:", v)
 		//TODO
 		fmt.Println(e.Nc, e.Vc)
+		//TODO add Interface For Complicated Data Input multi Columns.
 		s := readSheet(k, srv, spreadsheetId, e.Nc-1, e.Vc-1) //TODO GET FROM INDEX
 		format := v
 		data := make(map[string]string)
