@@ -8,16 +8,22 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
 
 //TODO Load Indexes From gsheet and xls
 
-type DataIndex struct {
+type dataIndex struct {
 	dbname string
-	data   interface{} //could be uri or more sofisticated data structure such as binindex image
+	data   interface{} // map[string]string or map[string][]string? could be uri or more sofisticated data structure such as binindex image
 	format string
+}
+
+func Load(uri string, router *mux.Router) error {
+	return LoadIndexURI(uri, router)
 }
 
 /* LoadIndexURI is a replace for Load
@@ -28,7 +34,7 @@ func LoadIndexURI(uri string, router *mux.Router) error {
 	if err != nil {
 		return err
 	}
-	err = LoadIndexesTo(d, router)
+	err = loadIndexesTo(d, router)
 	return err
 }
 
@@ -36,7 +42,7 @@ func LoadIndexURI(uri string, router *mux.Router) error {
  * or uri
  * or .xls file
  */
-func smartParseURI(uri string) ([]DataIndex, error) {
+func smartParseURI(uri string) ([]dataIndex, error) {
 	http, _ := regexp.Compile("^http://")
 	https, _ := regexp.Compile("^https://")
 
@@ -62,7 +68,8 @@ func smartParseURI(uri string) ([]DataIndex, error) {
 	return nil, errors.New("not recognize uri")
 }
 
-func LoadIndexesTo(indexes []DataIndex, router *mux.Router) error {
+/* For API , please using LoadIndexURI */
+func loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	fail := 0
 	entry := []string{}
 	jdata := []map[string]string{}
@@ -106,13 +113,16 @@ func LoadIndexesTo(indexes []DataIndex, router *mux.Router) error {
 
 	return nil
 }
-func LoadIndexTo(index DataIndex, router *mux.Router) error {
+
+/*
+func LoadIndexTo(index dataIndex, router *mux.Router) error {
 	return loadIndex(index, router)
 }
+*/
 
 /* serve: Add DataRouter to Router
  */
-func loadIndex(index DataIndex, router *mux.Router) error {
+func loadIndex(index dataIndex, router *mux.Router) error {
 	r, err := loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
 	if err == nil {
 		r.ServeTo(router)
@@ -213,6 +223,47 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 		case string:
 			return NewTabixImageManager(data.(string), dbname), nil //TODO MODIFICATION
 		}
+	case "img":
+		switch v := data.(type) {
+		default:
+			fmt.Printf("unexpected type %T", v)
+		case map[string][]string:
+			fmt.Printf("TODO")
+			r := InitBinindexImageRouter(dbname)
+			r.Load(_parseToBedImage(data.(map[string][]string)))
+			return r, nil
+			//return NewTabixImageManager(data.(string), dbname), nil //
+		}
 	}
 	return nil, errors.New("format not support")
+}
+
+func _parseToBedImage(d map[string][]string) []bedImage {
+	r := make([]bedImage, len(d))
+	i := 0
+	for k, v := range d {
+		r[i] = bedImage{
+			k,
+			v[0],
+			parseRegions(v[1]),
+		}
+		i++
+	}
+	return nil
+}
+func parseRegions(txt string) []Bed3 {
+	l := strings.Split(txt, ",")
+	b := make([]Bed3, len(l))
+	for i, v := range l {
+		b[i] = parseRegion(v)
+	}
+	return b
+}
+func parseRegion(txt string) Bed3 {
+	x := strings.Split(txt, ":")
+	chr := x[0]
+	se := strings.Split(x[1], "-")
+	start, _ := strconv.Atoi(se[0])
+	end, _ := strconv.Atoi(se[1])
+	return Bed3{chr, start, end}
 }

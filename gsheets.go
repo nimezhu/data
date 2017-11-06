@@ -4,20 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"os/user"
-	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
+	"strings"
 
-	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	sheets "google.golang.org/api/sheets/v4"
 )
 
@@ -91,7 +87,51 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdx int) map[string]string {
+/* readSheet is 1-index */
+func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string]interface{} {
+	if len(valueIdxs) == 0 {
+		a := make(map[string]interface{})
+		m := _readSheetToStringMap(id, srv, spreadsheetId, nameIdx, valueIdxs[0])
+		for k, v := range m {
+			a[k] = v
+		}
+		return a
+	} else {
+		a := make(map[string]interface{})
+		m := _readSheet(id, srv, spreadsheetId, nameIdx, valueIdxs)
+		for k, v := range m {
+			a[k] = v
+		}
+		return a
+	}
+	return nil
+}
+func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string][]string {
+	readRange := id + "!A2:ZZ"
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+	}
+	fmt.Println("Reading ", id)
+	r := make(map[string][]string)
+	l := len(valueIdxs)
+	if len(resp.Values) > 0 {
+		for _, row := range resp.Values {
+			// Print columns A and E, which correspond to indices 0 and 4.
+			s := make([]string, l)
+			for i, k := range valueIdxs {
+				s[i] = row[k-1].(string)
+			}
+			r[row[nameIdx-1].(string)] = s
+		}
+	} else {
+		fmt.Print("No data found.")
+	}
+	return r
+}
+
+/* readSheetToStringMap is 1-index */
+func _readSheetToStringMap(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdx int) map[string]string {
 	readRange := id + "!A2:ZZ"
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
@@ -102,7 +142,7 @@ func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int
 	if len(resp.Values) > 0 {
 		for _, row := range resp.Values {
 			// Print columns A and E, which correspond to indices 0 and 4.
-			r[row[nameIdx].(string)] = row[valueIdx].(string)
+			r[row[nameIdx-1].(string)] = row[valueIdx-1].(string)
 		}
 	} else {
 		fmt.Print("No data found.")
@@ -110,11 +150,12 @@ func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int
 	return r
 }
 
+/*TODO THIS add more interface */
 type IndexEntry struct {
 	Id   string
 	Type string
 	Nc   int
-	Vc   int
+	Vc   []int
 }
 
 func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
@@ -130,106 +171,17 @@ func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
 			// Print columns A and E, which correspond to indices 0 and 4.
 			//r[row[nameIdx].(string)] = row[valueIdx].(string)
 			nc, _ := strconv.Atoi(row[2].(string))
-			vc, _ := strconv.Atoi(row[3].(string))
+			//vc, _ := strconv.Atoi(row[3].(string))
+			//TODO
+			vs := strings.Split(row[3].(string), ",")
+			vc := make([]int, len(vs))
+			for i, v := range vs {
+				vc[i], _ = strconv.Atoi(v)
+			}
 			a[i] = IndexEntry{row[0].(string), row[1].(string), nc, vc}
 		}
 	} else {
 		fmt.Print("No data found.")
 	}
 	return a
-}
-
-func AddGSheets(spreadsheetId string, clientSecretJson string, router *mux.Router) map[string]DataManager {
-	m := map[string]DataManager{}
-	entry := []string{}
-	jdata := []map[string]string{}
-	httpP, _ := regexp.Compile("^http://")
-	httpsP, _ := regexp.Compile("^https://")
-
-	ctx := context.Background()
-
-	//b, err := ioutil.ReadFile("client_secret.json")
-	b, err := ioutil.ReadFile(clientSecretJson)
-	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
-	}
-
-	// If modifying these scopes, delete your previously saved credentials
-	// at ~/.credentials/sheets.googleapis.com-go-quickstart.json
-	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
-	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
-	}
-	client := getClient(ctx, config)
-
-	srv, err := sheets.New(client)
-	if err != nil {
-		log.Fatalf("Unable to retrieve Sheets Client %v", err)
-	}
-	c := readSheet("Config", srv, spreadsheetId, 0, 1)
-	index := readIndex(srv, spreadsheetId)
-	root, _ := c["root"]
-	//server, _ := c["server"]
-	/*
-		router.HandleFunc("/server/ls", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("{ \"main\":\"" + server + "\"}"))
-		}) //TODO FIX
-	*/
-	for _, e := range index {
-		k := e.Id
-		v := e.Type
-		if k[0] == '#' {
-			continue
-		}
-		fmt.Println("sheet:", k) //TODO
-		fmt.Println("format:", v)
-		//TODO
-		fmt.Println(e.Nc, e.Vc)
-		s := readSheet(k, srv, spreadsheetId, e.Nc-1, e.Vc-1) //TODO GET FROM INDEX
-		format := v
-		a := initDataManager(k, format) //TODO as router not datamanager
-		jdata = append(jdata, map[string]string{
-			"dbname": k,
-			"uri":    spreadsheetId + ":" + k,
-			"format": format,
-		})
-		entry = append(entry, k)
-		fmt.Println(s)
-		if v == "map" {
-			for k0, v0 := range s {
-				a.AddURI(v0, k0)
-			}
-		} else {
-			for id, loc := range s {
-				var uri string
-				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
-					uri = loc
-					a.AddURI(uri, id)
-				} else {
-					uri = path.Join(root, loc) //TODO
-					if _, err := os.Stat(uri); err == nil {
-						a.AddURI(uri, id)
-					} else {
-						log.Println("WARNING!!! cannot reading", uri, id)
-					}
-				}
-
-			}
-		}
-		a.ServeTo(router)
-		m[k] = a
-		fmt.Println("")
-	}
-
-	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
-		e, _ := json.Marshal(entry)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(e)
-	})
-	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
-		e, _ := json.Marshal(jdata)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(e)
-	})
-	return m
 }

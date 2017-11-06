@@ -13,8 +13,8 @@ import (
 	sheets "google.golang.org/api/sheets/v4"
 )
 
-func parseGSheet(spreadsheetId string) ([]DataIndex, error) {
-	di := []DataIndex{}
+func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
+	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
 
@@ -38,7 +38,7 @@ func parseGSheet(spreadsheetId string) ([]DataIndex, error) {
 	if err != nil {
 		log.Fatalf("Unable to retrieve Sheets Client %v", err)
 	}
-	c := readSheet("Config", srv, spreadsheetId, 0, 1)
+	c := readSheet("Config", srv, spreadsheetId, 1, []int{2})
 	index := readIndex(srv, spreadsheetId)
 	root, _ := c["root"]
 
@@ -53,23 +53,43 @@ func parseGSheet(spreadsheetId string) ([]DataIndex, error) {
 		//TODO
 		fmt.Println(e.Nc, e.Vc)
 		//TODO add Interface For Complicated Data Input multi Columns.
-		s := readSheet(k, srv, spreadsheetId, e.Nc-1, e.Vc-1) //TODO GET FROM INDEX
+		var s map[string]interface{}
+		s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //TODO GET FROM INDEX
 		format := v
-		data := make(map[string]string)
-		if v == "map" {
-			for k0, v0 := range s {
-				data[k0] = v0
-			}
-		} else {
-			for id, loc := range s {
-				var uri string
-				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
-					uri = loc
-					data[id] = uri
-				} else {
-					uri = path.Join(root, loc) //TODO
-					if _, err := os.Stat(uri); err == nil {
+		data := make(map[string]interface{})
+		if len(e.Vc) == 1 {
+			if format == "map" {
+				for k0, v0 := range s {
+					data[k0] = v0.(string)
+				}
+			} else { //for file
+				for id, loc := range s {
+					var uri string
+					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) {
+						uri = loc.(string)
 						data[id] = uri
+					} else {
+						uri = path.Join(root.(string), loc.(string)) //TODO
+						if _, err := os.Stat(uri); err == nil {
+							data[id] = uri
+						} else {
+							log.Println("WARNING!!! cannot reading", uri, id)
+						}
+					}
+
+				}
+			}
+		} else { //Vc columns > 1
+			for id, vals := range s {
+				var uri string
+				loc := vals.([]string)[0]
+				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
+					data[id] = vals
+				} else {
+					uri = path.Join(root.(string), loc) //TODO
+					if _, err := os.Stat(uri); err == nil {
+						vals.([]string)[0] = uri
+						data[id] = vals
 					} else {
 						log.Println("WARNING!!! cannot reading", uri, id)
 					}
@@ -77,7 +97,7 @@ func parseGSheet(spreadsheetId string) ([]DataIndex, error) {
 
 			}
 		}
-		d := DataIndex{
+		d := dataIndex{
 			k,
 			data,
 			format,

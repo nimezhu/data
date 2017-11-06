@@ -7,8 +7,8 @@ import (
 )
 
 //Replace AddDataManagers
-func parseTxt(uri string) ([]DataIndex, error) {
-	di := []DataIndex{}
+func parseTxt(uri string) ([]dataIndex, error) {
+	di := []dataIndex{}
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
 	r := csv.NewReader(reader)
@@ -21,7 +21,7 @@ func parseTxt(uri string) ([]DataIndex, error) {
 			continue
 		}
 		dbname, uri, format := line[0], line[1], line[2]
-		di = append(di, DataIndex{
+		di = append(di, dataIndex{
 			dbname,
 			uri,
 			format,

@@ -8,8 +8,8 @@ import (
 )
 
 //Replace AddDataManagers
-func parseJson(uri string) ([]DataIndex, error) {
-	di := []DataIndex{}
+func parseJson(uri string) ([]dataIndex, error) {
+	di := []dataIndex{}
 	r, err := netio.NewReadSeeker(uri)
 	checkErr(err)
 	var dat map[string]interface{}
@@ -28,7 +28,7 @@ func parseJson(uri string) ([]DataIndex, error) {
 		for k, v := range data[i].(map[string]interface{}) {
 			data2[k] = v.(string)
 		}
-		di = append(di, DataIndex{dbname, data2, format})
+		di = append(di, dataIndex{dbname, data2, format})
 	}
 
 	return di, nil

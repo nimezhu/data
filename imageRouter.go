@@ -14,7 +14,6 @@ import (
 	"github.com/nimezhu/data/image"
 )
 
-/* not working in windows */
 func getRootDir(dirs []string) string {
 	if len(dirs) == 1 {
 		return path.Dir(dirs[0])
@@ -68,6 +67,7 @@ type BinindexImageRouter struct {
 	dbname  string //sheet tab name
 	root    string //need to calc
 	inited  bool
+	idToUri map[string]string
 }
 type bedImage struct {
 	Name     string
@@ -82,6 +82,7 @@ func InitBinindexImageRouter(dbname string) *BinindexImageRouter {
 		dbname,
 		"",
 		false,
+		make(map[string]string),
 	}
 }
 
@@ -95,10 +96,10 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		i++
 	}
 	db.root = getRootDir(uris)
-	idToUri := make(map[string]string)
+	//idToUri := make(map[string]string)
 	for k, v := range db.dataMap {
 		u := strings.Replace(v.Uri, db.root, "", 1)
-		idToUri[k] = u
+		db.idToUri[k] = u
 	}
 	image.AddTo(router, db.dbname+"/images", db.root) //start server for host image files
 	router.HandleFunc("/"+db.dbname+"/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
@@ -123,20 +124,26 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		}
 		params := mux.Vars(r)
 		id := params["id"]
-		if uri, ok := idToUri[id]; ok {
+		if uri, ok := db.idToUri[id]; ok {
 			url := "/" + db.dbname + "/images/" + uri
 			if s != "" {
 				url += "?" + s
 			}
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		} else {
+			//TODO not found image
 		}
 	})
 
 }
 func (db *BinindexImageRouter) Add(image *bedImage) error {
+	var key string
 	if db.inited {
 		//TODO Fix Judge Root
-		return errors.New("server has been inited, couldn't add more images from other directory")
+		key = strings.Replace(image.Uri, db.root, "", 1)
+		if key == image.Uri {
+			return errors.New("server has been inited, couldn't add more images from other directory")
+		}
 	}
 	for _, bed := range image.Position {
 		bed4 := Bed4{
@@ -144,6 +151,7 @@ func (db *BinindexImageRouter) Add(image *bedImage) error {
 		}
 		db.index.Insert(bed4)
 	}
+	db.idToUri[image.Name] = key
 	db.dataMap[image.Name] = image
 	return nil
 }
@@ -156,3 +164,9 @@ func (db *BinindexImageRouter) Load(images []bedImage) error {
 	}
 	return nil
 }
+
+/*
+func (db *BinIndexImageRouter) LoadGSheet() error {
+	return nil
+}
+*/

@@ -12,8 +12,8 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func parseXls(uri string) ([]DataIndex, error) {
-	di := []DataIndex{}
+func parseXls(uri string) ([]dataIndex, error) {
+	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
 	r, err := netio.NewReadSeeker(uri)
@@ -89,7 +89,7 @@ func parseXls(uri string) ([]DataIndex, error) {
 
 				}
 			}
-			d := DataIndex{
+			d := dataIndex{
 				k,
 				data,
 				format,

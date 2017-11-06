@@ -9,8 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path"
 	"regexp"
 	"strings"
 
@@ -232,8 +230,9 @@ func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 
 /* Load: load uri to router
  *			 uri ext is json or tsv.
+ * Obsoleted
  */
-
+/*
 func Load(uri string, router *mux.Router) map[string]DataManager {
 	var managers map[string]DataManager
 	http, _ := regexp.Compile("^http://")
@@ -258,6 +257,7 @@ func Load(uri string, router *mux.Router) map[string]DataManager {
 
 	return managers
 }
+*/
 
 /* LoadCloud
  */
