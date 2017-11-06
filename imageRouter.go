@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -12,11 +14,15 @@ import (
 	"github.com/nimezhu/data/image"
 )
 
+/* not working in windows */
 func getRootDir(dirs []string) string {
+	if len(dirs) == 1 {
+		return path.Dir(dirs[0])
+	}
 	r := ""
 	a := make([][]string, len(dirs))
 	for i, v := range dirs {
-		a[i] = strings.Split(v, "/") //TODO handle windows ???
+		a[i] = strings.Split(v, string(filepath.Separator))
 	}
 	for j, sign := 0, true; sign; j++ {
 		//v := a[0][j]
