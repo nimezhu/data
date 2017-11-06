@@ -64,7 +64,6 @@ func smartParseURI(uri string) ([]dataIndex, error) {
 			return parseTxt(uri)
 		}
 	}
-	fmt.Println(uri)
 	return nil, errors.New("not recognize uri")
 }
 
@@ -147,10 +146,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 			return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 		case string:
 			return NewBigWigManager(data.(string), dbname), nil
-		case map[string]string:
+		case map[string]interface{}:
 			a := InitBigWigManager(dbname)
-			for key, val := range data.(map[string]string) {
-				a.AddURI(val, key)
+			for key, val := range data.(map[string]interface{}) {
+				a.AddURI(val.(string), key)
 			}
 			return a, nil
 		}
@@ -161,10 +160,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 			return nil, errors.New(fmt.Sprintf("hic format not support type %T", v))
 		case string:
 			return NewHicManager(data.(string), dbname), nil
-		case map[string]string:
+		case map[string]interface{}:
 			a := InitHicManager(dbname)
-			for key, val := range data.(map[string]string) {
-				a.AddURI(val, key)
+			for key, val := range data.(map[string]interface{}) {
+				a.AddURI(val.(string), key)
 			}
 			return a, nil
 		}
@@ -174,10 +173,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 			fmt.Printf("unexpected type %T", v)
 		case string:
 			return NewMapManager(data.(string), dbname), nil
-		case map[string]string:
+		case map[string]interface{}:
 			a := InitMapManager(dbname)
-			for key, val := range data.(map[string]string) {
-				a.AddURI(val, key)
+			for key, val := range data.(map[string]interface{}) {
+				a.AddURI(val.(string), key)
 			}
 			return a, nil
 		}
@@ -195,10 +194,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 			return nil, errors.New(fmt.Sprintf("bigbed format not support type %T", v))
 		case string:
 			return NewBigBedManager(data.(string), dbname), nil
-		case map[string]string:
+		case map[string]interface{}:
 			a := InitBigBedManager(dbname)
-			for key, val := range data.(map[string]string) {
-				a.AddURI(val, key)
+			for key, val := range data.(map[string]interface{}) {
+				a.AddURI(val.(string), key)
 			}
 			return a, nil
 		}
@@ -209,10 +208,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 			return nil, errors.New(fmt.Sprintf("track format not support type %T", v))
 		case string:
 			return NewTrackManager(data.(string), dbname), nil
-		case map[string]string:
+		case map[string]interface{}:
 			a := InitTrackManager(dbname)
-			for key, val := range data.(map[string]string) {
-				a.AddURI(val, key)
+			for key, val := range data.(map[string]interface{}) {
+				a.AddURI(val.(string), key)
 			}
 			return a, nil
 		}
@@ -226,11 +225,10 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 	case "img":
 		switch v := data.(type) {
 		default:
-			fmt.Printf("unexpected type %T", v)
-		case map[string][]string:
-			fmt.Printf("TODO")
+			fmt.Printf("unexpected type %T \n", v)
+		case map[string]interface{}:
 			r := InitBinindexImageRouter(dbname)
-			r.Load(_parseToBedImage(data.(map[string][]string)))
+			r.Load(_parseToBedImage(data.(map[string]interface{})))
 			return r, nil
 			//return NewTabixImageManager(data.(string), dbname), nil //
 		}
@@ -238,21 +236,21 @@ func loadData(dbname string, data interface{}, format string) (DataRouter, error
 	return nil, errors.New("format not support")
 }
 
-func _parseToBedImage(d map[string][]string) []bedImage {
+func _parseToBedImage(d map[string]interface{}) []bedImage {
 	r := make([]bedImage, len(d))
 	i := 0
 	for k, v := range d {
 		r[i] = bedImage{
 			k,
-			v[0],
-			parseRegions(v[1]),
+			v.([]string)[0],
+			parseRegions(v.([]string)[1]),
 		}
 		i++
 	}
-	return nil
+	return r
 }
 func parseRegions(txt string) []Bed3 {
-	l := strings.Split(txt, ",")
+	l := strings.Split(txt, ";")
 	b := make([]Bed3, len(l))
 	for i, v := range l {
 		b[i] = parseRegion(v)

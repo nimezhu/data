@@ -89,7 +89,7 @@ func saveToken(file string, token *oauth2.Token) {
 
 /* readSheet is 1-index */
 func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string]interface{} {
-	if len(valueIdxs) == 0 {
+	if len(valueIdxs) == 1 {
 		a := make(map[string]interface{})
 		m := _readSheetToStringMap(id, srv, spreadsheetId, nameIdx, valueIdxs[0])
 		for k, v := range m {
@@ -127,6 +127,7 @@ func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx in
 	} else {
 		fmt.Print("No data found.")
 	}
+	fmt.Println(r)
 	return r
 }
 

@@ -62,7 +62,7 @@ func (b *Bed3) End() int {
 }
 
 type BinindexImageRouter struct {
-	dataMap map[string]*bedImage //file name
+	dataMap map[string]bedImage //file name
 	index   *BinIndexMap
 	dbname  string //sheet tab name
 	root    string //need to calc
@@ -77,7 +77,7 @@ type bedImage struct {
 
 func InitBinindexImageRouter(dbname string) *BinindexImageRouter {
 	return &BinindexImageRouter{
-		make(map[string]*bedImage),
+		make(map[string]bedImage),
 		NewBinIndexMap(),
 		dbname,
 		"",
@@ -136,13 +136,15 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 	})
 
 }
-func (db *BinindexImageRouter) Add(image *bedImage) error {
+func (db *BinindexImageRouter) Add(image bedImage) error {
 	var key string
 	if db.inited {
-		//TODO Fix Judge Root
 		key = strings.Replace(image.Uri, db.root, "", 1)
+		//TODO Fix Judge Root
 		if key == image.Uri {
 			return errors.New("server has been inited, couldn't add more images from other directory")
+		} else {
+			db.idToUri[image.Name] = key
 		}
 	}
 	for _, bed := range image.Position {
@@ -151,13 +153,12 @@ func (db *BinindexImageRouter) Add(image *bedImage) error {
 		}
 		db.index.Insert(bed4)
 	}
-	db.idToUri[image.Name] = key
 	db.dataMap[image.Name] = image
 	return nil
 }
 func (db *BinindexImageRouter) Load(images []bedImage) error {
 	for _, v := range images {
-		err := db.Add(&v)
+		err := db.Add(v)
 		if err != nil {
 			return err
 		}

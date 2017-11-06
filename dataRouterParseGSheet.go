@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -48,10 +47,6 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 		if k[0] == '#' {
 			continue
 		}
-		fmt.Println("sheet:", k) //TODO
-		fmt.Println("format:", v)
-		//TODO
-		fmt.Println(e.Nc, e.Vc)
 		//TODO add Interface For Complicated Data Input multi Columns.
 		var s map[string]interface{}
 		s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //TODO GET FROM INDEX
