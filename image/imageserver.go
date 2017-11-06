@@ -56,10 +56,10 @@ func AddTo(r *mux.Router, prefix string, root string) {
 		log.Fatal(err)
 	}
 	r.HandleFunc("/"+prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("cmd:ls"))
+		w.Write([]byte("TODO:cmd:ls"))
 	})
 	r.HandleFunc("/"+prefix+"/{id:.*}/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("cmd:ls"))
+		w.Write([]byte("TODO:cmd:ls"))
 	})
 	r.Handle("/"+prefix+"/{id:.*}", http.StripPrefix("/"+prefix, newImageHTTPHandler(root)))
 	r.Handle("/favicon.ico", http.NotFoundHandler())

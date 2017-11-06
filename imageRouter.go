@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/data/image"
@@ -43,6 +44,16 @@ type bedImage struct {
 	Position []Bed3
 }
 
+func InitBinindexImageRouter(dbname string) *BinindexImageRouter {
+	return &BinindexImageRouter{
+		make(map[string]*bedImage),
+		NewBinIndexMap(),
+		dbname,
+		"",
+		false,
+	}
+}
+
 func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 	//Warning : Add or Load Before ServeTo.
 	db.inited = true
@@ -52,7 +63,13 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		uris[i] = v.Uri
 		i++
 	}
-	image.AddTo(router, db.dbname+".image", db.root) //start server for host image files
+	db.root = getRootDir(uris)
+	idToUri := make(map[string]string)
+	for k, v := range db.dataMap {
+		u := strings.Replace(v.Uri, db.root, "", 1)
+		idToUri[k] = u
+	}
+	image.AddTo(router, db.dbname+"/images", db.root) //start server for host image files
 	router.HandleFunc("/"+db.dbname+"/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
@@ -64,6 +81,23 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		for v := range vals {
 			io.WriteString(w, fmt.Sprint(v))
 			io.WriteString(w, "\n")
+		}
+	})
+	router.HandleFunc("/"+db.dbname+"/img/{id}", func(w http.ResponseWriter, r *http.Request) {
+		a := r.URL.String()
+		k := strings.Split(a, "?")
+		s := ""
+		if len(k) > 1 {
+			s = k[1]
+		}
+		params := mux.Vars(r)
+		id := params["id"]
+		if uri, ok := idToUri[id]; ok {
+			url := "/" + db.dbname + "/images/" + uri
+			if s != "" {
+				url += "?" + s
+			}
+			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		}
 	})
 
