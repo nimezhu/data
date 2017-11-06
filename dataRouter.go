@@ -129,25 +129,8 @@ func loadIndex(index dataIndex, router *mux.Router) error {
 
 /*TODO SHORT */
 func loadData(dbname string, data interface{}, format string) (DataRouter, error) {
-	switch format {
-	case "file":
-		return _fileLoader(dbname, data)
-	case "bigwig":
-		return _bigwigLoader(dbname, data)
-	case "hic":
-		return _hicLoader(dbname, data)
-	case "map":
-		return _mapLoader(dbname, data)
-	case "tabix":
-		return _tabixLoader(dbname, data)
-	case "bigbed":
-		return _bigbedLoader(dbname, data)
-	case "track":
-		return _trackLoader(dbname, data)
-	case "image":
-		return _imageLoader(dbname, data)
-	case "img":
-		return _imgLoader(dbname, data)
+	if f, ok := loaders[format]; ok {
+		return f(dbname, data)
 	}
 	return nil, errors.New("format not support")
 }

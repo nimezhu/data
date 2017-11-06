@@ -7,6 +7,20 @@ import (
 	"strings"
 )
 
+var (
+	loaders = map[string]func(string, interface{}) (DataRouter, error){
+		"file":   _fileLoader,
+		"bigwig": _bigwigLoader,
+		"bigbed": _bigbedLoader,
+		"hic":    _hicLoader,
+		"map":    _mapLoader,
+		"tabix":  _tabixLoader,
+		"image":  _imageLoader,
+		"img":    _imgLoader,
+		"track":  _trackLoader,
+	}
+)
+
 func _fileLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
