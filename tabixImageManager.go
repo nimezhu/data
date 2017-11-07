@@ -71,7 +71,16 @@ func regionText(b ShortBed) string {
 	e := strconv.Itoa(b.End())
 	return b.Chr() + ":" + s + "-" + e
 }
+
+//TODO
 func regionsText(bs []Bed4) string { //TODO interface array function
+	r := make([]string, len(bs))
+	for i, v := range bs {
+		r[i] = regionText(v)
+	}
+	return strings.Join(r, ",")
+}
+func bedsText(bs []Bed3) string { //TODO interface array function
 	r := make([]string, len(bs))
 	for i, v := range bs {
 		r[i] = regionText(v)

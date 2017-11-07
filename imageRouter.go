@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -51,13 +52,13 @@ type Bed3 struct {
 	end   int
 }
 
-func (b *Bed3) Chr() string {
+func (b Bed3) Chr() string {
 	return b.chr
 }
-func (b *Bed3) Start() int {
+func (b Bed3) Start() int {
 	return b.start
 }
-func (b *Bed3) End() int {
+func (b Bed3) End() int {
 	return b.end
 }
 
@@ -102,6 +103,17 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		db.idToUri[k] = u
 	}
 	image.AddTo(router, db.dbname+"/images", db.root) //start server for host image files
+
+	router.HandleFunc("/"+db.dbname+"/list", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("id\tpos\n"))
+		for k, v := range db.dataMap {
+			io.WriteString(w, fmt.Sprintf("%s\t%s\n", k, bedsText(v.Position)))
+		}
+	})
+	router.HandleFunc("/"+db.dbname+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		s, _ := json.Marshal(db.idToUri)
+		w.Write(s)
+	})
 	router.HandleFunc("/"+db.dbname+"/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
