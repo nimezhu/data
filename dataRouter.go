@@ -127,7 +127,6 @@ func loadIndex(index dataIndex, router *mux.Router) error {
 	return err
 }
 
-/*TODO SHORT */
 func loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	if f, ok := loaders[format]; ok {
 		return f(dbname, data)

@@ -80,6 +80,7 @@ func newDataManager(dbname string, uri string, format string) DataManager {
 	}
 	return nil
 }
+
 func initDataManager(dbname string, format string) DataManager {
 	switch format {
 	case "file":
@@ -110,7 +111,6 @@ func ReadJsonToManagers(uri string, router *mux.Router) map[string]DataManager {
 	jdata := []map[string]string{}
 	entry := []string{}
 	for i, v := range meta {
-		fmt.Println(i, v, data[i])
 		v1 := v.(map[string]interface{})
 		format, _ := v1["format"].(string)
 		dbname, _ := v1["dbname"].(string)
@@ -158,7 +158,6 @@ func AddDataManagers(uri string, router *mux.Router) map[string]DataManager {
 			continue
 		}
 		dbname, uri, format := line[0], line[1], line[2]
-		log.Println(dbname, uri, format)
 		entry = append(entry, dbname)
 		a := newDataManager(dbname, uri, format)
 		jdata = append(jdata, map[string]string{
@@ -182,6 +181,7 @@ func AddDataManagers(uri string, router *mux.Router) map[string]DataManager {
 	return m
 }
 
+/* obsoleted */
 func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 	w.On(astilectron.EventNameWindowEventMessage, func(e astilectron.Event) (deleteListener bool) {
 		var m string
@@ -227,37 +227,6 @@ func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 		return false
 	})
 }
-
-/* Load: load uri to router
- *			 uri ext is json or tsv.
- * Obsoleted
- */
-/*
-func Load(uri string, router *mux.Router) map[string]DataManager {
-	var managers map[string]DataManager
-	http, _ := regexp.Compile("^http://")
-	https, _ := regexp.Compile("^https://")
-
-	if len(uri) == len("1DEvA94QkN1KZQT51IYOOcIvGL2Ux7Qwqe5IpE9Pe1N8") { //GOOGLE SHEET ID ?
-		if _, err := os.Stat(uri); os.IsNotExist(err) {
-			if !http.MatchString(uri) && !https.MatchString(uri) {
-				managers = AddGSheets(uri, "client_secret.json", router) //TODO handle client_secret json variable.
-			}
-		}
-	} else {
-		ext := path.Ext(uri)
-		if ext == ".json" {
-			managers = ReadJsonToManagers(uri, router)
-		} else if ext == ".xlsx" {
-			managers = AddSheets(uri, router)
-		} else {
-			managers = AddDataManagers(uri, router)
-		}
-	}
-
-	return managers
-}
-*/
 
 /* LoadCloud
  */

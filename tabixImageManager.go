@@ -56,6 +56,9 @@ func (b Bed4) Start() int {
 func (b Bed4) End() int {
 	return b.end
 }
+func (b Bed4) Id() string {
+	return b.name
+}
 
 type ShortBed interface {
 	Chr() string

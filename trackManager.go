@@ -3,10 +3,9 @@ package data
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/indexed"
@@ -22,7 +21,7 @@ type DataManager interface {
 	Move(key1 string, key2 string) bool
 }
 */
-
+/* TrackManager supports bigbed bigwig and hic , tabixImage */
 type TrackManager struct {
 	id        string
 	uriMap    map[string]string
@@ -70,7 +69,6 @@ func newManager(prefix string, format string) Manager {
 }
 func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	format, _ := indexed.MagicReadSeeker(reader)
-	log.Println("adding ", key, uri)
 	if format == "hic" || format == "bigwig" || format == "bigbed" {
 		reader.Seek(0, 0)
 		if _, ok := m.managers[format]; !ok {
@@ -85,17 +83,23 @@ func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 func (m *TrackManager) AddURI(uri string, key string) error {
 	format, _ := indexed.Magic(uri)
 	m.formatMap[key] = format
+	m.uriMap[key] = uri
+	//HANDLE binindex in mem
+	if format == "binindex" {
+		m.uriMap[key] = strings.Replace(uri, "binindex:", "", 1)
+		return nil
+	}
 	if _, ok := m.managers[format]; !ok {
 		m.managers[format] = newManager(m.id, format)
 	}
 	m.managers[format].AddURI(uri, key)
-	m.uriMap[key] = uri
 	return nil
 }
 
 func (m *TrackManager) Del(k string) error {
 	if uri, ok := m.uriMap[k]; ok {
 		format, _ := indexed.Magic(uri)
+		//TODO binindex
 		delete(m.uriMap, k)
 		return m.managers[format].Del(k)
 	}
@@ -123,12 +127,23 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 		cmd := params["cmd"]
 		id := params["id"]
 		format, _ := m.formatMap[id]
-		fmt.Println("format", format, "id", id)
 		//w.Write([]byte(code))
 		//TODO redirect with format
-		url := prefix + "." + format + "/" + id + "/" + cmd
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		if format == "binindex" { //binindex in memory
+			uri, _ := m.uriMap[id] //name
+			a1 := strings.Replace(r.URL.String(), prefix+"/", "", 1)
+			a2 := strings.Replace(a1, id, uri, 1)
+			//url := "/" + uri + "/" + cmd
+			//fmt.Println(a2)
+			//fmt.Println(url)
+			url := "/" + a2
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		} else {
+			url := prefix + "." + format + "/" + id + "/" + cmd
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		}
 	})
 	for _, v := range m.managers {
 		v.ServeTo(router)

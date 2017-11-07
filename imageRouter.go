@@ -111,7 +111,7 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 		e, _ := strconv.Atoi(params["end"])
 		vals, _ := db.index.QueryRegion(chrom, s, e)
 		for v := range vals {
-			io.WriteString(w, fmt.Sprint(v))
+			io.WriteString(w, fmt.Sprintf("%s\t%d\t%d\t%s", chrom, v.Start(), v.End(), v.Id()))
 			io.WriteString(w, "\n")
 		}
 	})

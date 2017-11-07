@@ -16,6 +16,7 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
+	binindexP, _ := regexp.Compile("^binindex:")
 
 	ctx := context.Background()
 
@@ -60,7 +61,7 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 			} else { //for file
 				for id, loc := range s {
 					var uri string
-					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) {
+					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) || binindexP.MatchString(loc.(string)) {
 						uri = loc.(string)
 						data[id] = uri
 					} else {

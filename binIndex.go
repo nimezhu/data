@@ -13,10 +13,17 @@ type RangeI interface {
 	Start() int
 	End() int
 }
+type NamedRangeI interface {
+	RangeI
+	Id() string
+}
 type BedI interface {
+	RangeI
 	Chr() string
-	Start() int
-	End() int
+}
+type NamedBedI interface {
+	BedI
+	Id() string
 }
 
 func range2bin(start uint, end uint) uint {
@@ -79,10 +86,10 @@ func bin2level(bin uint) int {
 	return 0
 }
 
-type BinIndex map[int][]RangeI
+type BinIndex map[int][]NamedRangeI
 
 func newBinIndex() BinIndex {
-	return make(map[int][]RangeI)
+	return make(map[int][]NamedRangeI)
 }
 
 type BinIndexMap struct {
@@ -92,7 +99,7 @@ type BinIndexMap struct {
 func NewBinIndexMap() *BinIndexMap {
 	return &BinIndexMap{make(map[string]BinIndex)}
 }
-func (c *BinIndexMap) Load(b []BedI) error {
+func (c *BinIndexMap) Load(b []NamedBedI) error {
 	var err error
 	for _, v := range b {
 		err = c.Insert(v)
@@ -102,7 +109,7 @@ func (c *BinIndexMap) Load(b []BedI) error {
 	}
 	return err
 }
-func (c *BinIndexMap) Insert(b BedI) error {
+func (c *BinIndexMap) Insert(b NamedBedI) error {
 	chr := b.Chr()
 	if _, ok := c.Data[chr]; !ok {
 		c.Data[chr] = newBinIndex()
@@ -110,7 +117,7 @@ func (c *BinIndexMap) Insert(b BedI) error {
 	v, _ := c.Data[chr]
 	bin := range2bin(uint(b.Start()), uint(b.End()))
 	if _, ok := v[int(bin)]; !ok {
-		v[int(bin)] = []RangeI{}
+		v[int(bin)] = []NamedRangeI{}
 	}
 	v[int(bin)] = append(v[int(bin)], b)
 	return nil
@@ -118,12 +125,12 @@ func (c *BinIndexMap) Insert(b BedI) error {
 func overlap(a RangeI, b RangeI) bool {
 	return a.Start() < b.End() && b.Start() < a.End()
 }
-func (d *BinIndexMap) QueryRegion(chr string, start int, end int) (<-chan RangeI, error) {
+func (d *BinIndexMap) QueryRegion(chr string, start int, end int) (<-chan NamedRangeI, error) {
 	q := Bed4{chr, start, end, "noname"}
 	return d.Query(q)
 }
-func (d *BinIndexMap) Query(b BedI) (<-chan RangeI, error) { // need to reflect
-	bedCh := make(chan RangeI)
+func (d *BinIndexMap) Query(b BedI) (<-chan NamedRangeI, error) { // need to reflect
+	bedCh := make(chan NamedRangeI)
 	chr, ok := d.Data[b.Chr()]
 	if !ok {
 		return nil, errors.New("chr not found")
