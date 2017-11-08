@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -26,7 +27,14 @@ func _fileLoader(dbname string, data interface{}) (DataRouter, error) {
 	default:
 		return nil, errors.New(fmt.Sprintf("unexpected type %T", v))
 	case string:
+		log.Println("in file load string", data.(string))
 		return NewFileManager(data.(string), dbname), nil
+	case map[string]interface{}:
+		m := InitFileManager(dbname)
+		for k, v := range data.(map[string]interface{}) {
+			m.AddURI(v.(string), k)
+		}
+		return m, nil
 	}
 }
 

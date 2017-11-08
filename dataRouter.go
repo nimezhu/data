@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -122,7 +123,10 @@ func LoadIndexTo(index dataIndex, router *mux.Router) error {
 func loadIndex(index dataIndex, router *mux.Router) error {
 	r, err := loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
 	if err == nil {
+		log.Println("Loading to server", index.dbname)
 		r.ServeTo(router)
+	} else {
+		log.Println(err)
 	}
 	return err
 }
