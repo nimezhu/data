@@ -26,9 +26,26 @@ var (
 	}
 )
 
-func (e Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {
+func (e *Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {
 	if f, ok := loaders[format]; ok {
 		return f
+	}
+	if format == "bigwig2" { //bigwig with buffer
+		return func(dbname string, data interface{}) (DataRouter, error) {
+			switch v := data.(type) {
+			default:
+				fmt.Printf("unexpected type %T", v)
+				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
+			case string:
+				return NewBigWigManager2(data.(string), dbname, e.IndexRoot), nil
+			case map[string]interface{}:
+				a := InitBigWigManager2(dbname, e.IndexRoot)
+				for key, val := range data.(map[string]interface{}) {
+					a.AddURI(val.(string), key)
+				}
+				return a, nil
+			}
+		}
 	}
 	return nil
 }

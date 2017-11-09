@@ -132,10 +132,11 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 }
 
 func (m *Loader) loadData(dbname string, data interface{}, format string) (DataRouter, error) {
-	if f, ok := loaders[format]; ok {
-		return f(dbname, data)
+	f := m.Factory(dbname, data, format)
+	if f == nil {
+		return nil, errors.New("format not support")
 	}
-	return nil, errors.New("format not support")
+	return f(dbname, data)
 }
 func NewLoader(indexRoot string) *Loader {
 	return &Loader{indexRoot}
