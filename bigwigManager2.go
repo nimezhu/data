@@ -48,16 +48,21 @@ func (m *BigWigManager2) readBw(uri string) (*bbi.BigWigReader, error) {
 	checkErr(err)
 	bwf := bbi.NewBbiReader(reader)
 	fn, mode := m.checkUri(uri)
+	log.Println(fn, mode)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {
-		f, err := os.Open(fn)
-		defer f.Close()
-		if err != nil {
-			return nil, err
-		}
 		bwf.InitIndex()
-		go func() { bwf.WriteIndex(f) }()
+		go func() {
+			os.MkdirAll(path.Dir(fn), 0700)
+			f, err := os.Create(fn)
+			if err != nil {
+				log.Println("error in creating", err)
+			}
+			defer f.Close()
+			err = bwf.WriteIndex(f)
+			checkErr(err)
+		}()
 	} else if mode == 2 {
 		f, err := os.Open(fn)
 		defer f.Close()
