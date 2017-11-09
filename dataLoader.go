@@ -16,13 +16,13 @@ var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
 		"file": _fileLoader,
 		//"bigwig": _bigwigLoader,
-		"bigbed": _bigbedLoader,
-		"hic":    _hicLoader,
-		"map":    _mapLoader,
-		"tabix":  _tabixLoader,
-		"image":  _imageLoader,
-		"img":    _imgLoader,
-		"track":  _trackLoader,
+		//"bigbed": _bigbedLoader,
+		"hic":   _hicLoader,
+		"map":   _mapLoader,
+		"tabix": _tabixLoader,
+		"image": _imageLoader,
+		"img":   _imgLoader,
+		//"track": _trackLoader,
 	}
 )
 
@@ -30,7 +30,9 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 	if f, ok := loaders[format]; ok {
 		return f
 	}
-	if format == "bigwig" { //bigwig with buffer
+	//TODO
+	switch format {
+	case "bigwig": //bigwig with buffer
 		return func(dbname string, data interface{}) (DataRouter, error) {
 			switch v := data.(type) {
 			default:
@@ -46,7 +48,41 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 				return a, nil
 			}
 		}
+	case "bigbed":
+		return func(dbname string, data interface{}) (DataRouter, error) {
+			switch v := data.(type) {
+			default:
+				fmt.Printf("unexpected type %T", v)
+				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
+			case string:
+				return NewBigBedManager2(data.(string), dbname, e.IndexRoot), nil
+			case map[string]interface{}:
+				a := InitBigBedManager2(dbname, e.IndexRoot)
+				for key, val := range data.(map[string]interface{}) {
+					a.AddURI(val.(string), key)
+				}
+				return a, nil
+			}
+		}
+	case "track":
+		return func(dbname string, data interface{}) (DataRouter, error) {
+			switch v := data.(type) {
+			default:
+				fmt.Printf("unexpected type %T", v)
+				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
+			case string:
+				return NewTrackManager2(data.(string), dbname, e.IndexRoot), nil
+			case map[string]interface{}:
+				a := InitTrackManager2(dbname, e.IndexRoot)
+				for key, val := range data.(map[string]interface{}) {
+					a.AddURI(val.(string), key)
+				}
+				return a, nil
+			}
+		}
+
 	}
+
 	return nil
 }
 
