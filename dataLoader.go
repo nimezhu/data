@@ -14,8 +14,8 @@ type Loader struct {
 
 var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
-		"file":   _fileLoader,
-		"bigwig": _bigwigLoader,
+		"file": _fileLoader,
+		//"bigwig": _bigwigLoader,
 		"bigbed": _bigbedLoader,
 		"hic":    _hicLoader,
 		"map":    _mapLoader,
@@ -30,7 +30,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 	if f, ok := loaders[format]; ok {
 		return f
 	}
-	if format == "bigwig2" { //bigwig with buffer
+	if format == "bigwig" { //bigwig with buffer
 		return func(dbname string, data interface{}) (DataRouter, error) {
 			switch v := data.(type) {
 			default:
