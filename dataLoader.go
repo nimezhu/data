@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+type Loader struct {
+	IndexRoot string
+}
+
 var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
 		"file":   _fileLoader,
@@ -21,6 +25,13 @@ var (
 		"track":  _trackLoader,
 	}
 )
+
+func (e Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {
+	if f, ok := loaders[format]; ok {
+		return f
+	}
+	return nil
+}
 
 func _fileLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
