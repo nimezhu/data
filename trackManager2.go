@@ -92,7 +92,7 @@ func (m *TrackManager2) AddURI(uri string, key string) error {
 		return nil
 	}
 	if _, ok := m.managers[format]; !ok {
-		m.managers[format] = newManager(m.id, format)
+		m.managers[format] = _newManager2(m.id, format, m.root)
 	}
 	m.managers[format].AddURI(uri, key)
 	return nil
