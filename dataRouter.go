@@ -21,19 +21,19 @@ type dataIndex struct {
 	format string
 }
 
-func Load(uri string, router *mux.Router) error {
-	return LoadIndexURI(uri, router)
+func (m *Loader) Load(uri string, router *mux.Router) error {
+	return m.loadIndexURI(uri, router)
 }
 
 /* LoadIndexURI is a replace for Load
  *  it is more flexible for complex struture data
  */
-func LoadIndexURI(uri string, router *mux.Router) error {
+func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 	d, err := smartParseURI(uri)
 	if err != nil {
 		return err
 	}
-	err = loadIndexesTo(d, router)
+	err = m.loadIndexesTo(d, router)
 	return err
 }
 
@@ -67,12 +67,12 @@ func smartParseURI(uri string) ([]dataIndex, error) {
 }
 
 /* For API , please using LoadIndexURI */
-func loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
+func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	fail := 0
 	entry := []string{}
 	jdata := []map[string]string{}
 	for _, v := range indexes {
-		err := loadIndex(v, router)
+		err := m.loadIndex(v, router)
 		if err != nil {
 			fail += 1
 		} else {
@@ -120,8 +120,8 @@ func LoadIndexTo(index dataIndex, router *mux.Router) error {
 
 /* serve: Add DataRouter to Router
  */
-func loadIndex(index dataIndex, router *mux.Router) error {
-	r, err := loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
+func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
+	r, err := m.loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
 	if err == nil {
 		log.Println("Loading to server", index.dbname)
 		r.ServeTo(router)
@@ -131,9 +131,12 @@ func loadIndex(index dataIndex, router *mux.Router) error {
 	return err
 }
 
-func loadData(dbname string, data interface{}, format string) (DataRouter, error) {
+func (m *Loader) loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	if f, ok := loaders[format]; ok {
 		return f(dbname, data)
 	}
 	return nil, errors.New("format not support")
+}
+func NewLoader(indexRoot string) *Loader {
+	return &Loader{indexRoot}
 }
