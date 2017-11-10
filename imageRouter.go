@@ -105,12 +105,14 @@ func (db *BinindexImageRouter) ServeTo(router *mux.Router) {
 	image.AddTo(router, db.dbname+"/images", db.root) //start server for host image files
 
 	router.HandleFunc("/"+db.dbname+"/list", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Write([]byte("id\tpos\n"))
 		for k, v := range db.dataMap {
 			io.WriteString(w, fmt.Sprintf("%s\t%s\n", k, bedsText(v.Position)))
 		}
 	})
 	router.HandleFunc("/"+db.dbname+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		s, _ := json.Marshal(db.idToUri)
 		w.Write(s)
 	})
