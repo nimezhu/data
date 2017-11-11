@@ -53,6 +53,28 @@ func (m *BigBedManager2) checkUri(uri string) (string, int) {
 		return "", 0
 	}
 }
+func (m *BigBedManager2) SaveIdx(uri string) (int, error) {
+	fn, mode := m.checkUri(uri)
+	if mode == 1 {
+		reader, err := netio.NewReadSeeker(uri)
+		if err != nil {
+			return -1, err
+		}
+		bwf := bbi.NewBbiReader(reader)
+		defer bwf.Close()
+		os.MkdirAll(path.Dir(fn), 0700)
+		f, err := os.Create(fn)
+		if err != nil {
+			log.Println("error in creating", err)
+		}
+		defer f.Close()
+		err = bwf.WriteIndex(f)
+		if err != nil {
+			return -1, err
+		}
+	}
+	return mode, nil
+}
 func (m *BigBedManager2) readBw(uri string) (*bbi.BigBedReader, error) {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
