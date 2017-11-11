@@ -11,6 +11,7 @@ import (
 	"regexp"
 
 	"github.com/gorilla/mux"
+	"github.com/nimezhu/indexed"
 )
 
 //TODO Load Indexes From gsheet and xls
@@ -41,6 +42,38 @@ func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
  * or uri
  * or .xls file
  */
+func SaveIndex(uri string, root string) error {
+	h1, _ := regexp.Compile("^http://")
+	h2, _ := regexp.Compile("^https://")
+	d, err := smartParseURI(uri)
+	if err != nil {
+		return err
+	}
+	bw := InitBigWigManager2("noname", root)
+	for _, v := range d {
+		if v.format == "bigwig" || v.format == "bigbed" || v.format == "track" {
+			switch t := v.data.(type) {
+			default:
+				fmt.Printf("unexpected type %T", t)
+				return errors.New(fmt.Sprintf("bigwig format not support type %T", t))
+			case string:
+				return errors.New("Not support text input yet")
+			case map[string]interface{}:
+				for _, val := range v.data.(map[string]interface{}) {
+					if !h1.MatchString(val.(string)) && !h2.MatchString(val.(string)) {
+						continue
+					}
+					format, _ := indexed.Magic(val.(string))
+					if format == "bigwig" || format == "bigbed" {
+						log.Println("process " + val.(string))
+						bw.SaveIdx(val.(string))
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
 func smartParseURI(uri string) ([]dataIndex, error) {
 	http, _ := regexp.Compile("^http://")
 	https, _ := regexp.Compile("^https://")

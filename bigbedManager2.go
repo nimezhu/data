@@ -64,14 +64,22 @@ func (m *BigBedManager2) SaveIdx(uri string) (int, error) {
 		defer bwf.Close()
 		os.MkdirAll(path.Dir(fn), 0700)
 		f, err := os.Create(fn)
+		defer f.Close()
 		if err != nil {
 			log.Println("error in creating", err)
 		}
-		defer f.Close()
-		err = bwf.WriteIndex(f)
+		err = bwf.InitIndex()
 		if err != nil {
+			log.Println(err)
 			return -1, err
 		}
+		err = bwf.WriteIndex(f)
+
+		if err != nil {
+			log.Println(err)
+			return -1, err
+		}
+
 	}
 	return mode, nil
 }

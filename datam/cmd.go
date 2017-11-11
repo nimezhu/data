@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -46,6 +47,23 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:   "saveidx",
+			Usage:  "save remote bigwig and bigbed index",
+			Action: CmdSaveIdx,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "input,i",
+					Usage: "input data tsv",
+					Value: "data tsv",
+				},
+				cli.StringFlag{
+					Name:  "root,r",
+					Usage: "root for index",
+					Value: "",
+				},
+			},
+		},
 	}
 
 	app.Run(os.Args)
@@ -56,9 +74,19 @@ func CmdStart(c *cli.Context) error {
 	router := mux.NewRouter()
 	snowjs.AddHandlers(router, "")
 	AddStaticHandle(router)
-	data.Load(uri, router) //TODO using only router not manager interface.
+	L := data.NewLoader("./tmpidx")
+	L.Load(uri, router) //TODO using only router not manager interface.
 	log.Println("Listening...")
 	log.Println("Please open http://127.0.0.1:" + strconv.Itoa(port))
 	http.ListenAndServe(":"+strconv.Itoa(port), router)
+	return nil
+}
+func CmdSaveIdx(c *cli.Context) error {
+	uri := c.String("input")
+	root := c.String("root")
+	if root == "" {
+		root = path.Join(os.Getenv("HOME"), ".cnb", "index") //TODO
+	}
+	data.SaveIndex(uri, root)
 	return nil
 }

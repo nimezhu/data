@@ -46,23 +46,34 @@ func (m *BigWigManager2) checkUri(uri string) (string, int) {
 
 func (m *BigWigManager2) SaveIdx(uri string) (int, error) {
 	fn, mode := m.checkUri(uri)
+	if mode == 2 {
+		log.Println("index in local")
+	}
 	if mode == 1 {
+		log.Println("fetching")
 		reader, err := netio.NewReadSeeker(uri)
 		if err != nil {
 			return -1, err
 		}
 		bwf := bbi.NewBbiReader(reader)
 		defer bwf.Close()
+		err = bwf.InitIndex()
+		if err != nil {
+			log.Println(err)
+			return -1, err
+		}
 		os.MkdirAll(path.Dir(fn), 0700)
 		f, err := os.Create(fn)
 		if err != nil {
 			log.Println("error in creating", err)
 		}
-		defer f.Close()
+
 		err = bwf.WriteIndex(f)
 		if err != nil {
 			return -1, err
 		}
+		log.Println("saved")
+		f.Close()
 	}
 	return mode, nil
 }
