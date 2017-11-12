@@ -9,7 +9,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/indexed/bbi"
@@ -34,60 +33,21 @@ type BigBedManager2 struct {
 	indexRoot string
 }
 
+/*
 func (m *BigBedManager2) checkUri(uri string) (string, int) {
-	if h1.MatchString(uri) || h2.MatchString(uri) {
-		var dir string
-		if h1.MatchString(uri) {
-			dir = strings.Replace(uri, "http://", "", 1)
-		} else {
-			dir = strings.Replace(uri, "https://", "", 1)
-		}
-		dir += ".index"
-		fn := path.Join(m.indexRoot, dir)
-		if _, err := os.Stat(fn); os.IsNotExist(err) {
-			return fn, 1
-		} else {
-			return fn, 2
-		}
-	} else {
-		return "", 0
-	}
+	return checkUri(uri, m.indexRoot)
 }
+
 func (m *BigBedManager2) SaveIdx(uri string) (int, error) {
-	fn, mode := m.checkUri(uri)
-	if mode == 1 {
-		reader, err := netio.NewReadSeeker(uri)
-		if err != nil {
-			return -1, err
-		}
-		bwf := bbi.NewBbiReader(reader)
-		defer bwf.Close()
-		os.MkdirAll(path.Dir(fn), 0700)
-		f, err := os.Create(fn)
-		defer f.Close()
-		if err != nil {
-			log.Println("error in creating", err)
-		}
-		err = bwf.InitIndex()
-		if err != nil {
-			log.Println(err)
-			return -1, err
-		}
-		err = bwf.WriteIndex(f)
-
-		if err != nil {
-			log.Println(err)
-			return -1, err
-		}
-
-	}
-	return mode, nil
+	return saveIdx(uri, m.indexRoot)
 }
+*/
+
 func (m *BigBedManager2) readBw(uri string) (*bbi.BigBedReader, error) {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
 	bwf := bbi.NewBbiReader(reader)
-	fn, mode := m.checkUri(uri)
+	fn, mode := checkUri(uri, m.indexRoot)
 	log.Println(fn, mode)
 	if mode == 0 {
 		bwf.InitIndex()
@@ -121,7 +81,7 @@ func (m *BigBedManager2) readBw(uri string) (*bbi.BigBedReader, error) {
 func (m *BigBedManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
-	fn, mode := m.checkUri(uri)
+	fn, mode := checkUri(uri, m.indexRoot)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {

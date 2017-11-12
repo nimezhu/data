@@ -24,7 +24,7 @@ var (
    1 : remote file without local index
    2 : remote file with local index
 */
-func (m *BigWigManager2) checkUri(uri string) (string, int) {
+func checkUri(uri string, root string) (string, int) {
 	if h1.MatchString(uri) || h2.MatchString(uri) {
 		var dir string
 		if h1.MatchString(uri) {
@@ -33,7 +33,7 @@ func (m *BigWigManager2) checkUri(uri string) (string, int) {
 			dir = strings.Replace(uri, "https://", "", 1)
 		}
 		dir += ".index"
-		fn := path.Join(m.indexRoot, dir)
+		fn := path.Join(root, dir)
 		if _, err := os.Stat(fn); os.IsNotExist(err) {
 			return fn, 1
 		} else {
@@ -43,9 +43,8 @@ func (m *BigWigManager2) checkUri(uri string) (string, int) {
 		return "", 0
 	}
 }
-
-func (m *BigWigManager2) SaveIdx(uri string) (int, error) {
-	fn, mode := m.checkUri(uri)
+func saveIdx(uri string, root string) (int, error) {
+	fn, mode := checkUri(uri, root)
 	if mode == 2 {
 		log.Println("index in local")
 	}
@@ -77,11 +76,23 @@ func (m *BigWigManager2) SaveIdx(uri string) (int, error) {
 	}
 	return mode, nil
 }
+
+/*
+func (m *BigWigManager2) checkUri(uri string) (string, int) {
+	return checkUri(uri, m.indexRoot)
+}
+
+
+func (m *BigWigManager2) SaveIdx(uri string) (int, error) {
+	return saveIdx(uri, m.indexRoot)
+}
+*/
+
 func (m *BigWigManager2) readBw(uri string) (*bbi.BigWigReader, error) {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
 	bwf := bbi.NewBbiReader(reader)
-	fn, mode := m.checkUri(uri)
+	fn, mode := checkUri(uri, m.indexRoot)
 	log.Println(fn, mode)
 	if mode == 0 {
 		bwf.InitIndex()
@@ -125,7 +136,7 @@ type BigWigManager2 struct {
 func (m *BigWigManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
-	fn, mode := m.checkUri(uri)
+	fn, mode := checkUri(uri, m.indexRoot)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {

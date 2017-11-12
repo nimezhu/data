@@ -49,7 +49,7 @@ func SaveIndex(uri string, root string) error {
 	if err != nil {
 		return err
 	}
-	bw := InitBigWigManager2("noname", root)
+	//bw := InitBigWigManager2("noname", root)
 	for _, v := range d {
 		if v.format == "bigwig" || v.format == "bigbed" || v.format == "track" {
 			switch t := v.data.(type) {
@@ -66,7 +66,7 @@ func SaveIndex(uri string, root string) error {
 					format, _ := indexed.Magic(val.(string))
 					if format == "bigwig" || format == "bigbed" {
 						log.Println("process " + val.(string))
-						bw.SaveIdx(val.(string))
+						saveIdx(val.(string), root)
 					}
 				}
 			}
