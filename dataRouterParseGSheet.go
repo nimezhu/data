@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -20,7 +19,8 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 
 	ctx := context.Background()
 
-	b, err := ioutil.ReadFile("client_secret.json") //TODO
+	b, err := Asset("client_secret.json")
+	//TODO any json which allow access gsheet.
 	//b, err := ioutil.ReadFile(clientSecretJson)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
