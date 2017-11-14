@@ -11,7 +11,7 @@ import (
 	sheets "google.golang.org/api/sheets/v4"
 )
 
-func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
+func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
@@ -30,8 +30,9 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
-
-	client := getClient(ctx, config)
+	//TODO Get Client Agent.
+	gA := gAgent{dir}
+	client := gA.getClient(ctx, config)
 
 	srv, err := sheets.New(client)
 	if err != nil {

@@ -30,7 +30,7 @@ func (m *Loader) Load(uri string, router *mux.Router) error {
  *  it is more flexible for complex struture data
  */
 func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
-	d, err := smartParseURI(uri)
+	d, err := m.smartParseURI(uri)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,8 @@ func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 func SaveIndex(uri string, root string) error {
 	h1, _ := regexp.Compile("^http://")
 	h2, _ := regexp.Compile("^https://")
-	d, err := smartParseURI(uri)
+	m := Loader{root}
+	d, err := m.smartParseURI(uri)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func SaveIndex(uri string, root string) error {
 	}
 	return nil
 }
-func smartParseURI(uri string) ([]dataIndex, error) {
+func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 	http, _ := regexp.Compile("^http://")
 	https, _ := regexp.Compile("^https://")
 
@@ -82,7 +83,8 @@ func smartParseURI(uri string) ([]dataIndex, error) {
 		if _, err := os.Stat(uri); os.IsNotExist(err) {
 			if !http.MatchString(uri) && !https.MatchString(uri) {
 				//managers = AddGSheets(uri, "client_secret.json", router) //TODO handle client_secret json variable.
-				return parseGSheet(uri)
+				root := path.Dir(m.IndexRoot)
+				return parseGSheet(uri, root)
 
 			}
 		}

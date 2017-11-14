@@ -29,7 +29,7 @@ func (agent gAgent) getClient(ctx context.Context, config *oauth2.Config) *http.
 }
 
 func (agent gAgent) tokenCacheFile() (string, error) {
-	tokenCacheDir := filepath.Join(agent.root, ".credentials")
+	tokenCacheDir := filepath.Join(agent.root, "credentials")
 	os.MkdirAll(tokenCacheDir, 0700)
 	return filepath.Join(tokenCacheDir,
 		url.QueryEscape("gsheets.json")), nil
