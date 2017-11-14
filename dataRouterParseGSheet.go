@@ -26,12 +26,11 @@ func parseGSheet(spreadsheetId string) ([]dataIndex, error) {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 
-	// If modifying these scopes, delete your previously saved credentials
-	// at ~/.credentials/sheets.googleapis.com-go-quickstart.json
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
+
 	client := getClient(ctx, config)
 
 	srv, err := sheets.New(client)
