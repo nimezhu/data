@@ -10,12 +10,13 @@ import (
 
 type Loader struct {
 	IndexRoot string
+	Plugins   map[string]func(string, interface{}) (DataRouter, error)
 }
 
 var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
 		"file": _fileLoader,
-		//"bigwig": _bigwigLoader,
+		//"bigwig": _bigwigLoader_v2,
 		//"bigbed": _bigbedLoader,
 		"hic":   _hicLoader,
 		"map":   _mapLoader,
@@ -26,11 +27,27 @@ var (
 	}
 )
 
+func (e *Loader) AddLoader(format string, f func(string, interface{}) (DataRouter, error)) error {
+	//TODO
+	_, ok := loaders[format]
+	if ok || format == "bigwig" || format == "bigbed" || format == "track" {
+		return errors.New("keyword reserved")
+	}
+	e.Plugins[format] = f
+	return nil
+}
+func NewLoader(root string) *Loader {
+	return &Loader{root, make(map[string]func(string, interface{}) (DataRouter, error))}
+}
+
 func (e *Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {
+	if f0, ok := e.Plugins[format]; ok {
+		return f0
+	}
 	if f, ok := loaders[format]; ok {
 		return f
 	}
-	//TODO
+	//TODO e.IndexRoot
 	switch format {
 	case "bigwig": //bigwig with buffer
 		return func(dbname string, data interface{}) (DataRouter, error) {

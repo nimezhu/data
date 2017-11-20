@@ -45,7 +45,7 @@ func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 func SaveIndex(uri string, root string) error {
 	h1, _ := regexp.Compile("^http://")
 	h2, _ := regexp.Compile("^https://")
-	m := Loader{root}
+	m := NewLoader(root)
 	d, err := m.smartParseURI(uri)
 	if err != nil {
 		return err
@@ -172,7 +172,4 @@ func (m *Loader) loadData(dbname string, data interface{}, format string) (DataR
 		return nil, errors.New("format not support")
 	}
 	return f(dbname, data)
-}
-func NewLoader(indexRoot string) *Loader {
-	return &Loader{indexRoot}
 }
