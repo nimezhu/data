@@ -12,7 +12,6 @@ import (
 	"regexp"
 	"strings"
 
-	astilectron "github.com/asticode/go-astilectron"
 	"github.com/gorilla/mux"
 	minio "github.com/minio/minio-go"
 	"github.com/nimezhu/netio"
@@ -182,6 +181,7 @@ func AddDataManagers(uri string, router *mux.Router) map[string]DataManager {
 }
 
 /* obsoleted */
+/*
 func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 	w.On(astilectron.EventNameWindowEventMessage, func(e astilectron.Event) (deleteListener bool) {
 		var m string
@@ -227,6 +227,7 @@ func AddAsticodeToWindow(w *astilectron.Window, dbmap map[string]DataManager) {
 		return false
 	})
 }
+*/
 
 /* LoadCloud
  */
