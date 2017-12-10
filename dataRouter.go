@@ -22,6 +22,19 @@ type dataIndex struct {
 	format string
 }
 
+/*middleware*/
+func (m *Loader) AddDataMiddleware(uri string, h http.Handler) http.Handler {
+	router := mux.NewRouter()
+	m.Load(uri, router)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		match := &mux.RouteMatch{}
+		if router.Match(r, match) {
+			router.ServeHTTP(w, r)
+		} else {
+			h.ServeHTTP(w, r)
+		}
+	})
+}
 func (m *Loader) Load(uri string, router *mux.Router) error {
 	return m.loadIndexURI(uri, router)
 }
