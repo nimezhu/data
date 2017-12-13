@@ -34,6 +34,15 @@ func NewCytoBandManager(id string) *CytoBandManager {
 	m := &CytoBandManager{id, make(map[string]*CytoBand)}
 	return m
 }
+func InitCytoBandManager(id string) *CytoBandManager {
+	m := &CytoBandManager{id, make(map[string]*CytoBand)}
+	files, _ := genomedb.AssetDir("cytoBand")
+	for _, v := range files {
+		a := strings.Split(v, ".")
+		m.Add(a[0])
+	}
+	return m
+}
 
 /*
 type DataManager interface {
