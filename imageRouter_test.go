@@ -1,13 +1,6 @@
 package data
 
-import (
-	"log"
-	"net/http"
-	"testing"
-
-	"github.com/gorilla/mux"
-)
-
+/*
 func TestGetRoot(t *testing.T) {
 	roots := []string{"/home/zhuxp/1", "/home/zhuxp/2", "/home/zhuxp/image/3"}
 	r := getRootDir(roots)
@@ -26,3 +19,4 @@ func TestImageRouter(t *testing.T) {
 	s.ServeTo(router)
 	log.Fatal(http.ListenAndServe(":8082", router))
 }
+*/
