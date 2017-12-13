@@ -1,14 +1,17 @@
 package data
 
 import (
+	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/nimezhu/genomedb"
 	"github.com/nimezhu/netio"
 )
 
@@ -64,10 +67,17 @@ func parseCytoBand(txt string) (CytoBand, error) {
 	return cytoband, nil
 }
 func (m *CytoBandManager) AddURI(uri string, key string) error {
-	f, err := netio.NewReadSeeker(uri)
-	if err != nil {
-		return err
+	var f io.Reader
+	var err error
+	if v, ok := genomedb.Asset("cytoBand/" + key + ".cytoBand.txt.gz"); ok == nil {
+		f = bytes.NewReader(v)
+	} else {
+		f, err = netio.NewReadSeeker(uri)
+		if err != nil {
+			return err
+		}
 	}
+
 	z, err := gzip.NewReader(f)
 	if err != nil {
 		return err
