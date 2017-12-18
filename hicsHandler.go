@@ -168,7 +168,34 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 			io.WriteString(w, err.Error())
 		}
 	})
-	router.HandleFunc(prefix+"/{id}/corrected/{chr}：{start}-{end}/{resIdx}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(prefix+"/{id}/get2doe/{chr}:{start}-{end}/{chr2}:{start2}-{end2}/{resIdx}/{norm}/{unit}/{format}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		params := mux.Vars(r)
+		id := params["id"]
+		chr := params["chr"]
+		start, _ := strconv.Atoi(params["start"])
+		end, _ := strconv.Atoi(params["end"])
+		resIdx, _ := strconv.Atoi(params["resIdx"])
+		chr2 := params["chr2"]
+		start2, _ := strconv.Atoi(params["start2"])
+		end2, _ := strconv.Atoi(params["end2"])
+		format := params["format"]
+		norm, _ := strconv.Atoi(params["norm"])
+		unit, _ := strconv.Atoi(params["unit"])
+		m, err := hicMap[id].QueryOE2(chr, start, end, chr2, start2, end2, norm, unit, resIdx)
+		if err == nil {
+			if format == "bin" {
+				w.Header().Set("Content-Type", "application/octet-stream")
+				a := matrixToBytes(m)
+				w.Write(a)
+			} else {
+				io.WriteString(w, sprintMat64_2(m)) //TODO resolution
+			}
+		} else {
+			io.WriteString(w, err.Error())
+		}
+	})
+	router.HandleFunc(prefix+"/{id}/corrected/{chr}:{start}-{end}/{resIdx}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
 		//chr := params["chr"]
@@ -180,67 +207,5 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		j, _ := json.Marshal([]int{s, e})
 		w.Write(j)
 	})
-	router.HandleFunc(prefix+"/{id}/icon/{chr}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		params := mux.Vars(r)
-		id := params["id"]
-		chr := params["chr"]
-		format := params["format"]
-		m, err := hicMap[id].Icon(chr)
-		if err == nil {
 
-			if format == "bin" {
-				w.Header().Set("Content-Type", "application/octet-stream")
-				a := matrixToBytes(m)
-				w.Write(a)
-			} else {
-				io.WriteString(w, sprintMat64(m))
-			}
-		} else {
-			io.WriteString(w, err.Error())
-		}
-	})
-	router.HandleFunc(prefix+"/{id}/iconsmart/{chr}/{width}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		params := mux.Vars(r)
-		id := params["id"]
-		chr := params["chr"]
-		width, _ := strconv.Atoi(params["width"])
-		m, err := hicMap[id].IconSmart(chr, width)
-		if err == nil {
-			format := params["format"]
-			if format == "bin" {
-				w.Header().Set("Content-Type", "application/octet-stream")
-				a := matrixToBytes(m)
-				w.Write(a)
-			} else {
-				io.WriteString(w, sprintMat64(m))
-			}
-		} else {
-
-			io.WriteString(w, err.Error())
-		}
-	})
-	router.HandleFunc(prefix+"/{id}/icon2smart/{chr}:{chr2}/{width}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		params := mux.Vars(r)
-		id := params["id"]
-		chr := params["chr"]
-		chr2 := params["chr2"]
-		width, _ := strconv.Atoi(params["width"])
-		format := params["format"]
-		m, err := hicMap[id].Icon2Smart(chr, chr2, width)
-		if err == nil {
-
-			if format == "bin" {
-				w.Header().Set("Content-Type", "application/octet-stream")
-				a := matrixToBytes(m)
-				w.Write(a)
-			} else {
-				io.WriteString(w, sprintMat64(m))
-			}
-		} else {
-			io.WriteString(w, err.Error())
-		}
-	})
 }
