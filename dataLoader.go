@@ -11,6 +11,7 @@ import (
 type Loader struct {
 	IndexRoot string
 	Plugins   map[string]func(string, interface{}) (DataRouter, error)
+	Data      map[string]DataRouter
 }
 
 var (
@@ -37,7 +38,7 @@ func (e *Loader) AddLoader(format string, f func(string, interface{}) (DataRoute
 	return nil
 }
 func NewLoader(root string) *Loader {
-	return &Loader{root, make(map[string]func(string, interface{}) (DataRouter, error))}
+	return &Loader{root, make(map[string]func(string, interface{}) (DataRouter, error)), make(map[string]DataRouter)}
 }
 
 func (e *Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {

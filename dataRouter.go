@@ -38,6 +38,9 @@ func (m *Loader) AddDataMiddleware(uri string, h http.Handler) http.Handler {
 func (m *Loader) Load(uri string, router *mux.Router) error {
 	return m.loadIndexURI(uri, router)
 }
+func (m *Loader) Reload(uri string) error {
+	return m.refreshIndexURI(uri)
+}
 
 /* LoadIndexURI is a replace for Load
  *  it is more flexible for complex struture data
@@ -48,6 +51,22 @@ func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 		return err
 	}
 	err = m.loadIndexesTo(d, router)
+	return err
+}
+
+/* LoadIndexURI is a replace for Load
+ *  it is more flexible for complex struture data
+ */
+func (m *Loader) refreshIndexURI(uri string) error {
+	d, err := m.smartParseURI(uri)
+	if err != nil {
+		return err
+	}
+	for _, v := range d {
+		if v.format == "track" {
+			m.Refresh(v.dbname, v.data, v.format)
+		}
+	}
 	return err
 }
 
@@ -172,6 +191,7 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 	r, err := m.loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
 	if err == nil {
 		log.Println("Loading to server", index.dbname)
+		m.Data[index.dbname] = r
 		r.ServeTo(router)
 	} else {
 		log.Println(err)
