@@ -153,15 +153,16 @@ func _readSheetToStringMap(id string, srv *sheets.Service, spreadsheetId string,
 
 /*TODO THIS add more interface */
 type IndexEntry struct {
-	Id   string
-	Type string
-	Nc   int
-	Vc   []int
+	Genome string
+	Id     string
+	Type   string
+	Nc     int
+	Vc     []int
 }
 
 func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
 	id := "Index"
-	readRange := id + "!A2:D"
+	readRange := id + "!A2:E"
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet. %v", err)
@@ -170,16 +171,17 @@ func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
 	if len(resp.Values) > 0 {
 		for i, row := range resp.Values {
 			// Print columns A and E, which correspond to indices 0 and 4.
+			// A is Genome Version Or Prefix Name
 			//r[row[nameIdx].(string)] = row[valueIdx].(string)
-			nc, _ := strconv.Atoi(row[2].(string))
+			nc, _ := strconv.Atoi(row[3].(string))
 			//vc, _ := strconv.Atoi(row[3].(string))
 			//TODO
-			vs := strings.Split(row[3].(string), ",")
+			vs := strings.Split(row[4].(string), ",")
 			vc := make([]int, len(vs))
 			for i, v := range vs {
 				vc[i], _ = strconv.Atoi(v)
 			}
-			a[i] = IndexEntry{row[0].(string), row[1].(string), nc, vc}
+			a[i] = IndexEntry{row[0].(string), row[1].(string), row[2].(string), nc, vc}
 		}
 	} else {
 		fmt.Print("No data found.")

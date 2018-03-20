@@ -22,13 +22,14 @@ func parseJson(uri string) ([]dataIndex, error) {
 	meta := dat["meta"].([]interface{})
 	for i, v := range meta {
 		v1 := v.(map[string]interface{})
+		genome, _ := v1["genome"].(string)
 		format, _ := v1["format"].(string)
 		dbname, _ := v1["dbname"].(string)
 		data2 := map[string]string{}
 		for k, v := range data[i].(map[string]interface{}) {
 			data2[k] = v.(string)
 		}
-		di = append(di, dataIndex{dbname, data2, format})
+		di = append(di, dataIndex{genome, dbname, data2, format})
 	}
 
 	return di, nil

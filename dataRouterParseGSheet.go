@@ -43,6 +43,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	root, _ := c["root"]
 
 	for _, e := range index {
+		g := e.Genome //TODO
 		k := e.Id
 		v := e.Type
 		if k[0] == '#' {
@@ -94,6 +95,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 			}
 		}
 		d := dataIndex{
+			g,
 			k,
 			data,
 			format,

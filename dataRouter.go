@@ -17,9 +17,10 @@ import (
 //TODO Load Indexes From gsheet and xls
 
 type dataIndex struct {
-	dbname string
+	genome string      `json:"genome"`
+	dbname string      `json:"dbname"`
 	data   interface{} // map[string]string or map[string][]string? could be uri or more sofisticated data structure such as binindex image
-	format string
+	format string      `json:"format"`
 }
 
 /*middleware*/
@@ -134,33 +135,64 @@ func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 }
 
 /* For API , please using LoadIndexURI */
-func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
-	fail := 0
-	entry := []string{}
-	jdata := []map[string]string{}
-	for _, v := range indexes {
-		err := m.loadIndex(v, router)
-		if err != nil {
-			fail += 1
-		} else {
-			switch v.data.(type) {
-			case string:
-				jdata = append(jdata, map[string]string{
-					"dbname": v.dbname,
-					"uri":    v.data.(string),
-					"format": v.format,
-				})
-			default:
-				jdata = append(jdata, map[string]string{
-					"dbname": v.dbname,
-					"uri":    "null",
-					"format": v.format,
-				})
-
-			}
-			entry = append(entry, v.dbname)
+func trans(v dataIndex) map[string]string {
+	switch v.data.(type) {
+	case string:
+		return map[string]string{
+			"genome": v.genome,
+			"dbname": v.dbname,
+			"uri":    v.data.(string),
+			"format": v.format,
+		}
+	default:
+		return map[string]string{
+			"genome": v.genome,
+			"dbname": v.dbname,
+			"uri":    "null",
+			"format": v.format,
 		}
 	}
+	return nil
+}
+func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
+	//add genome versions .
+	fail := 0
+	//todo entry data and genomes in loader.
+	entry := []string{}
+	jdata := []map[string]string{}
+	gs := map[string][]dataIndex{}
+	for _, v := range indexes {
+		if v.genome != "all" {
+			if _, ok := gs[v.genome]; !ok {
+				gs[v.genome] = []dataIndex{}
+			}
+			gs[v.genome] = append(gs[v.genome], v)
+		} else {
+			err := m.loadIndex(v, router)
+			if err != nil {
+				fail += 1
+			} else {
+				jdata = append(jdata, trans(v))
+				entry = append(entry, v.dbname)
+			}
+		}
+	}
+	gdb := map[string][]map[string]string{}
+	for g, v := range gs {
+		log.Println("Loading Genome Data ", g)
+		gdb[g] = []map[string]string{}
+		for _, v0 := range v {
+			err := m.loadIndex(v0, router)
+			if err != nil {
+				fail += 1
+			} else {
+				gdb[g] = append(gdb[g], trans(v0))
+			}
+		}
+	}
+	/** TODO
+			/consider reload problem too.
+	 **/
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(entry)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -171,6 +203,31 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Write(e)
 	})
+	router.HandleFunc("/genomes", func(w http.ResponseWriter, r *http.Request) {
+		g := []string{}
+		for k, _ := range gs {
+			g = append(g, k)
+		}
+		e, _ := json.Marshal(g)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Write(e)
+	})
+	for k, v := range gs {
+		router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
+			u := []string{}
+			for _, v0 := range v {
+				u = append(u, v0.dbname)
+			}
+			e, _ := json.Marshal(u)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Write(e)
+		})
+		router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
+			e, _ := json.Marshal(gdb[k])
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Write(e)
+		})
+	}
 	//add json and list to router
 	if fail > 0 {
 		return errors.New(fmt.Sprintf("Fail loading %d / %d database", fail, len(indexes)))
@@ -188,10 +245,12 @@ func LoadIndexTo(index dataIndex, router *mux.Router) error {
 /* serve: Add DataRouter to Router
  */
 func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
-	r, err := m.loadData(index.dbname, index.data, index.format) //TODO not really need to load uri
+	//TODO: add genome version
+	r, err := m.loadData(index.genome+":"+index.dbname, index.data, index.format)
+	//TODO not really need to load uri
 	if err == nil {
-		log.Println("Loading to server", index.dbname)
-		m.Data[index.dbname] = r
+		log.Println("Loading to server", index.genome, index.dbname) //TODO double name
+		m.Data[index.genome+":"+index.dbname] = r                    //TODO double name
 		r.ServeTo(router)
 	} else {
 		log.Println(err)

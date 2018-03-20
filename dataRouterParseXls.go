@@ -42,11 +42,12 @@ func parseXls(uri string) ([]dataIndex, error) {
 	}
 	idxRows := index.Rows
 	type item struct {
-		Id       string `xlsx:"0"`
-		Type     string `xlsx:"1"`
-		Nc       int    `xlsx:"2"`
-		Vc       string `xlsx:"3"` //TODO VC is []ints
-		Preserve bool   `xlsx:"4"`
+		Genome   string `xlsx:"0"`
+		Id       string `xlsx:"1"`
+		Type     string `xlsx:"2"`
+		Nc       int    `xlsx:"3"`
+		Vc       string `xlsx:"4"` //TODO VC is []ints
+		Preserve bool   `xlsx:"5"`
 	}
 	for _, row := range idxRows[1:] {
 		a := &item{}
@@ -61,8 +62,7 @@ func parseXls(uri string) ([]dataIndex, error) {
 		if vsheet, ok := xlFile.Sheet[a.Id]; ok {
 			format := a.Type
 			k := a.Id
-			fmt.Println("init", k, format)
-
+			g := a.Genome
 			data := make(map[string]interface{})
 			if a.Type == "map" {
 				vcs := strings.Split(a.Vc, ",")
@@ -120,6 +120,7 @@ func parseXls(uri string) ([]dataIndex, error) {
 				}
 			}
 			d := dataIndex{
+				g,
 				k,
 				data,
 				format,

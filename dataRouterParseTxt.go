@@ -20,8 +20,9 @@ func parseTxt(uri string) ([]dataIndex, error) {
 		if i == 0 {
 			continue
 		}
-		dbname, uri, format := line[0], line[1], line[2]
+		genome, dbname, uri, format := line[0], line[1], line[2], line[3]
 		di = append(di, dataIndex{
+			genome,
 			dbname,
 			uri,
 			format,
