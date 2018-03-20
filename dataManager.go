@@ -95,6 +95,8 @@ func initDataManager(dbname string, format string) DataManager {
 	}
 	return nil
 }
+
+/* Obsoleted */
 func ReadJsonToManagers(uri string, router *mux.Router) map[string]DataManager {
 	m := map[string]DataManager{}
 	r, err := netio.NewReadSeeker(uri)
@@ -141,6 +143,7 @@ func ReadJsonToManagers(uri string, router *mux.Router) map[string]DataManager {
 	return m
 }
 
+/*Obsoleted */
 func AddDataManagers(uri string, router *mux.Router) map[string]DataManager {
 	m := map[string]DataManager{}
 	reader, err := netio.NewReadSeeker(uri)

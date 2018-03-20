@@ -246,14 +246,26 @@ func LoadIndexTo(index dataIndex, router *mux.Router) error {
  */
 func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 	//TODO: add genome version
-	r, err := m.loadData(index.genome+":"+index.dbname, index.data, index.format)
-	//TODO not really need to load uri
-	if err == nil {
-		log.Println("Loading to server", index.genome, index.dbname) //TODO double name
-		m.Data[index.genome+":"+index.dbname] = r                    //TODO double name
-		r.ServeTo(router)
+	var err error
+	if index.genome != "all" {
+		r, err := m.loadData(index.genome+"/"+index.dbname, index.data, index.format)
+		//TODO not really need to load uri
+		if err == nil {
+			log.Println("Loading to server", index.genome, index.dbname) //TODO double name
+			m.Data[index.genome+"/"+index.dbname] = r                    //TODO double name
+			r.ServeTo(router)
+		} else {
+			log.Println(err)
+		}
 	} else {
-		log.Println(err)
+		r, err := m.loadData(index.dbname, index.data, index.format)
+		if err == nil {
+			log.Println("Loading to server", index.genome, index.dbname) //TODO double name
+			m.Data[index.dbname] = r                                     //TODO double name
+			r.ServeTo(router)
+		} else {
+			log.Println(err)
+		}
 	}
 	return err
 }
