@@ -213,20 +213,25 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 		w.Write(e)
 	})
 	for k, v := range gs {
-		router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
-			u := []string{}
-			for _, v0 := range v {
-				u = append(u, v0.dbname)
-			}
-			e, _ := json.Marshal(u)
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Write(e)
-		})
-		router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
-			e, _ := json.Marshal(gdb[k])
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Write(e)
-		})
+		go func(k string, v []dataIndex) {
+			router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
+				u := []string{}
+				fmt.Println("list", k)
+				for _, v0 := range v {
+					u = append(u, v0.dbname)
+				}
+				e, _ := json.Marshal(u)
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Write(e)
+			})
+		}(k, v)
+		go func(k string, e []map[string]string) {
+			router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
+				e, _ := json.Marshal(e)
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Write(e)
+			})
+		}(k, gdb[k])
 	}
 	//add json and list to router
 	if fail > 0 {
