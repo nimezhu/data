@@ -65,7 +65,7 @@ func (m *Loader) refreshIndexURI(uri string) error {
 	}
 	for _, v := range d {
 		if v.format == "track" {
-			m.Refresh(v.dbname, v.data, v.format)
+			m.Refresh(v.genome+"/"+v.dbname, v.data, v.format)
 		}
 	}
 	return err
