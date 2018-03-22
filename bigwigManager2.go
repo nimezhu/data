@@ -131,6 +131,7 @@ type BigWigManager2 struct {
 	bwMap     map[string]*bbi.BigWigReader
 	dbname    string
 	indexRoot string
+	valueMap  map[string]map[string]interface{} //LONG LABELS
 }
 
 func (m *BigWigManager2) Add(key string, reader io.ReadSeeker, uri string) error {
@@ -186,6 +187,7 @@ func (m *BigWigManager2) Move(key1 string, key2 string) bool {
 		m.bwMap[key2] = d
 		delete(m.uriMap, key1)
 		delete(m.bwMap, key1)
+		delete(m.valueMap, key1)
 	}
 	return ok1 && ok2
 }
@@ -210,6 +212,7 @@ func NewBigWigManager2(uri string, dbname string, indexRoot string) *BigWigManag
 	//prefix := "/" + dbname
 	uriMap := LoadURI(uri)
 	bwmap := make(map[string]*bbi.BigWigReader)
+	valueMap := make(map[string]map[string]interface{})
 	for k, v := range uriMap {
 		bwmap[k] = readBw(v)
 	}
@@ -218,6 +221,7 @@ func NewBigWigManager2(uri string, dbname string, indexRoot string) *BigWigManag
 		bwmap,
 		dbname,
 		indexRoot,
+		valueMap,
 	}
 	//m.ServeTo(router)
 	return &m
@@ -226,11 +230,13 @@ func NewBigWigManager2(uri string, dbname string, indexRoot string) *BigWigManag
 func InitBigWigManager2(dbname string, indexRoot string) *BigWigManager2 {
 	uriMap := make(map[string]string)
 	bwMap := make(map[string]*bbi.BigWigReader)
+	valueMap := make(map[string]map[string]interface{})
 	m := BigWigManager2{
 		uriMap,
 		bwMap,
 		dbname,
 		indexRoot,
+		valueMap,
 	}
 	return &m
 }
