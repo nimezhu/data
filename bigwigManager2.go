@@ -134,6 +134,10 @@ type BigWigManager2 struct {
 	valueMap  map[string]map[string]interface{} //LONG LABELS
 }
 
+func (m *BigWigManager2) SetAttr(key string, value map[string]interface{}) error {
+	m.valueMap[key] = value
+	return nil
+}
 func (m *BigWigManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)

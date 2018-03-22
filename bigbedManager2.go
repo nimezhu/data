@@ -78,7 +78,10 @@ func (m *BigBedManager2) readBw(uri string) (*bbi.BigBedReader, error) {
 	bw := bbi.NewBigBedReader(bwf)
 	return bw, nil
 }
-
+func (m *BigBedManager2) SetAttr(key string, value map[string]interface{}) error {
+	m.valueMap[key] = value
+	return nil
+}
 func (m *BigBedManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
@@ -112,18 +115,6 @@ func (bb *BigBedManager2) AddURI(uri string, key string) error {
 	bb.uriMap[key] = uri
 	var err error
 	bb.dataMap[key], err = bb.readBw(uri)
-	/*
-		reader, err := netio.NewReadSeeker(uri)
-		if err != nil {
-			return err
-		}
-		bwf := bbi.NewBbiReader(reader)
-		err = bwf.InitIndex()
-		if err != nil {
-			return err
-		}
-		br := bbi.NewBigBedReader(bwf)
-	*/
 	return err
 }
 
