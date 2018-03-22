@@ -13,9 +13,10 @@ import (
 
 /*HicManager implement DataManager Inteface */
 type HicManager struct {
-	uriMap  map[string]string
-	dataMap map[string]*hic.HiC
-	dbname  string
+	uriMap   map[string]string
+	dataMap  map[string]*hic.HiC
+	dbname   string
+	valueMap map[string]map[string]interface{}
 }
 
 func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
@@ -73,6 +74,7 @@ func (m *HicManager) ServeTo(router *mux.Router) {
 func NewHicManager(uri string, dbname string) *HicManager {
 	uriMap := LoadURI(uri)
 	dataMap := make(map[string]*hic.HiC)
+	valueMap := make(map[string]map[string]interface{})
 	dataList := []string{}
 	for k, v := range uriMap {
 		dataMap[k] = readhic(v)
@@ -89,6 +91,7 @@ func NewHicManager(uri string, dbname string) *HicManager {
 		uriMap,
 		dataMap,
 		dbname,
+		valueMap,
 	}
 	//m.ServeTo(router)
 	return &m
@@ -96,10 +99,12 @@ func NewHicManager(uri string, dbname string) *HicManager {
 func InitHicManager(dbname string) *HicManager {
 	uriMap := make(map[string]string)
 	dataMap := make(map[string]*hic.HiC)
+	valueMap := make(map[string]map[string]interface{})
 	m := HicManager{
 		uriMap,
 		dataMap,
 		dbname,
+		valueMap,
 	}
 	return &m
 }

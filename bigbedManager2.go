@@ -31,6 +31,7 @@ type BigBedManager2 struct {
 	dataMap   map[string]*bbi.BigBedReader
 	dbname    string
 	indexRoot string
+	valueMap  map[string]map[string]interface{}
 }
 
 /*
@@ -129,6 +130,7 @@ func (bb *BigBedManager2) AddURI(uri string, key string) error {
 func (m *BigBedManager2) Del(key string) error {
 	delete(m.uriMap, key)
 	delete(m.dataMap, key)
+	delete(m.valueMap, key)
 	return nil
 }
 func (m *BigBedManager2) Get(key string) (string, bool) {
@@ -234,12 +236,14 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 func NewBigBedManager2(uri string, dbname string, root string) *BigBedManager2 {
 	uriMap := LoadURI(uri)
 	dataMap := make(map[string]*bbi.BigBedReader)
+	valueMap := make(map[string]map[string]interface{})
 	//dataList := []string{}
 	m := BigBedManager2{
 		uriMap,
 		dataMap,
 		dbname,
 		root,
+		valueMap,
 	}
 	for k, v := range uriMap {
 		m.AddURI(v, k)
@@ -253,11 +257,13 @@ func NewBigBedManager2(uri string, dbname string, root string) *BigBedManager2 {
 func InitBigBedManager2(dbname string, root string) *BigBedManager2 {
 	uriMap := make(map[string]string)
 	dataMap := make(map[string]*bbi.BigBedReader)
+	valueMap := make(map[string]map[string]interface{})
 	m := BigBedManager2{
 		uriMap,
 		dataMap,
 		dbname,
 		root,
+		valueMap,
 	}
 	return &m
 }
