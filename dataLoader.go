@@ -65,7 +65,6 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 					case string:
 						a.AddURI(val.(string), key)
 					case map[string]interface{}:
-						//TODO val should be val.(map[string]{}interface)
 						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
 							a.SetAttr(key, val.(map[string]interface{}))
@@ -117,7 +116,6 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 					case map[string]interface{}:
 						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
-							//TODO Add Set Attr API
 							a.SetAttr(key, val.(map[string]interface{}))
 						}
 					}
@@ -173,7 +171,15 @@ func _hicLoader(dbname string, data interface{}) (DataRouter, error) {
 	case map[string]interface{}:
 		a := InitHicManager(dbname)
 		for key, val := range data.(map[string]interface{}) {
-			a.AddURI(val.(string), key)
+			switch val.(type) {
+			case string:
+				a.AddURI(val.(string), key)
+			case map[string]interface{}:
+				if uri, ok := val.(map[string]interface{})["uri"]; ok {
+					a.AddURI(uri.(string), key)
+					a.SetAttr(key, val.(map[string]interface{}))
+				}
+			}
 		}
 		return a, nil
 	}

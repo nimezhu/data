@@ -283,9 +283,8 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 }
 
 /* TODO load Data With
-   Attrs
-	 Change Data into map[string]interface{}
-	 For all Factories
+Change Data into map[string]interface{}
+For all Factories
 */
 func (m *Loader) loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	f := m.Factory(dbname, data, format)
