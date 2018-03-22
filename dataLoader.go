@@ -61,7 +61,16 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 			case map[string]interface{}:
 				a := InitBigWigManager2(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
-					a.AddURI(val.(string), key)
+					switch val.(type) {
+					case string:
+						a.AddURI(val.(string), key)
+					case map[string]interface{}:
+						//TODO val should be val.(map[string]{}interface)
+						if uri, ok := val.(map[string]interface{})["uri"]; ok {
+							a.AddURI(uri.(string), key)
+							a.SetAttr(key, val.(map[string]interface{}))
+						}
+					}
 				}
 				return a, nil
 			}
@@ -77,7 +86,16 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 			case map[string]interface{}:
 				a := InitBigBedManager2(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
-					a.AddURI(val.(string), key)
+					switch val.(type) {
+					case string:
+						a.AddURI(val.(string), key)
+					case map[string]interface{}:
+						if uri, ok := val.(map[string]interface{})["uri"]; ok {
+							a.AddURI(uri.(string), key)
+							//TODO Add Set Attr API
+							a.SetAttr(key, val.(map[string]interface{}))
+						}
+					}
 				}
 				return a, nil
 			}
@@ -93,7 +111,16 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 			case map[string]interface{}:
 				a := InitTrackManager2(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
-					a.AddURI(val.(string), key)
+					switch val.(type) {
+					case string:
+						a.AddURI(val.(string), key)
+					case map[string]interface{}:
+						if uri, ok := val.(map[string]interface{})["uri"]; ok {
+							a.AddURI(uri.(string), key)
+							//TODO Add Set Attr API
+							a.SetAttr(key, val.(map[string]interface{}))
+						}
+					}
 				}
 				return a, nil
 			}

@@ -206,7 +206,7 @@ func (m *BigWigManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		jsonHic, _ := json.Marshal(m.uriMap)
+		jsonHic, _ := json.Marshal(m.uriMap) //not only uriMap ... but also attrs.
 		w.Write(jsonHic)
 	})
 	AddBwsHandle(router, m.bwMap, prefix)

@@ -26,7 +26,7 @@ type TrackManager2 struct {
 	id        string
 	uriMap    map[string]string
 	formatMap map[string]string
-	managers  map[string]Manager
+	managers  map[string]Manager2
 	root      string
 }
 
@@ -41,7 +41,7 @@ func NewTrackManager2(uri string, dbname string, root string) *TrackManager2 {
 func InitTrackManager2(dbname string, root string) *TrackManager2 {
 	uriMap := make(map[string]string)
 	formatMap := make(map[string]string)
-	dataMap := make(map[string]Manager)
+	dataMap := make(map[string]Manager2)
 	m := TrackManager2{
 		dbname,
 		uriMap,
@@ -51,7 +51,7 @@ func InitTrackManager2(dbname string, root string) *TrackManager2 {
 	}
 	return &m
 }
-func _newManager2(prefix string, format string, root string) Manager {
+func _newManager2(prefix string, format string, root string) Manager2 {
 	if format == "bigwig" {
 		return InitBigWigManager2(prefix+".bigwig", root)
 	}
@@ -64,10 +64,18 @@ func _newManager2(prefix string, format string, root string) Manager {
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
 	}
+	/* obsoleted
 	if format == "image" {
 		return InitTabixImageManager(prefix + ".image")
 	}
+	*/
 	return nil
+}
+func (m *TrackManager2) SetAttr(key string, values map[string]interface{}) error {
+	if v, ok := m.managers[m.formatMap[key]]; ok {
+		return v.SetAttr(key, values)
+	}
+	return errors.New("not found manager")
 }
 func (m *TrackManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	format, _ := indexed.MagicReadSeeker(reader)

@@ -15,7 +15,11 @@ import (
 )
 
 //TODO Load Indexes From gsheet and xls
-
+//TODO dataIndexes with attrs ...
+//TODO DATAURI SYSTEM
+//TODO SERVER / GENOME(VERSION) / NAME
+//TODO LS Parameters Get Specific Attrs Such as longLabels
+//TODO Parse Descriptions
 type dataIndex struct {
 	genome string      `json:"genome"`
 	dbname string      `json:"dbname"`
@@ -134,7 +138,10 @@ func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 	return nil, errors.New("not recognize uri")
 }
 
-/* For API , please using LoadIndexURI */
+/* For API , please using LoadIndexURI
+ * TODO: uri change to attrs
+ *       or add attrs in string
+ */
 func trans(v dataIndex) map[string]string {
 	switch v.data.(type) {
 	case string:
@@ -275,6 +282,11 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 	return err
 }
 
+/* TODO load Data With
+   Attrs
+	 Change Data into map[string]interface{}
+	 For all Factories
+*/
 func (m *Loader) loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	f := m.Factory(dbname, data, format)
 	if f == nil {
