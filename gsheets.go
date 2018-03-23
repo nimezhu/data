@@ -182,16 +182,19 @@ func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
 	a := make([]IndexEntry, len(resp.Values))
 	if len(resp.Values) > 0 {
 		for i, row := range resp.Values {
-			// Print columns A and E, which correspond to indices 0 and 4.
-			// A is Genome Version Or Prefix Name
-			//r[row[nameIdx].(string)] = row[valueIdx].(string)
-			nc, _ := strconv.Atoi(row[3].(string))
-			//vc, _ := strconv.Atoi(row[3].(string))
+			ns := row[3].(string)
+			nc, err := strconv.Atoi(ns)
 			//TODO
+			if err != nil {
+				nc = colNameToNumber(ns)
+			}
 			vs := strings.Split(row[4].(string), ",")
 			vc := make([]int, len(vs))
 			for i, v := range vs {
-				vc[i], _ = strconv.Atoi(v)
+				vc[i], err = strconv.Atoi(v)
+				if err != nil {
+					vc[i] = colNameToNumber(v)
+				}
 			}
 			a[i] = IndexEntry{row[0].(string), row[1].(string), row[2].(string), nc, vc}
 		}
