@@ -38,21 +38,32 @@ func parseXls(uri string) ([]dataIndex, error) {
 	}
 	index, ok := xlFile.Sheet["Index"]
 	if !ok {
-
+		log.Println("can not find Index sheet")
 	}
 	idxRows := index.Rows
 	type item struct {
 		Genome   string `xlsx:"0"`
 		Id       string `xlsx:"1"`
 		Type     string `xlsx:"2"`
-		Nc       int    `xlsx:"3"`
-		Vc       string `xlsx:"4"` //TODO VC is []ints
+		Ns       string `xlsx:"3"` //TODO string parse to int
+		Vs       string `xlsx:"4"` //TODO VC is []ints
 		Preserve bool   `xlsx:"5"`
+	}
+	type entry struct {
+		Genome   string
+		Id       string
+		Type     string
+		Nc       int
+		Vc       []int
+		Preserve bool
 	}
 	for _, row := range idxRows[1:] {
 		a := &item{}
 		row.ReadStruct(a)
 		fmt.Println(a)
+		if a == nil {
+			continue
+		}
 		if len(a.Id) == 0 {
 			break
 		}
@@ -60,27 +71,44 @@ func parseXls(uri string) ([]dataIndex, error) {
 			continue
 		}
 		if vsheet, ok := xlFile.Sheet[a.Id]; ok {
+			log.Println(a.Id)
 			format := a.Type
 			k := a.Id
 			g := a.Genome
 			data := make(map[string]interface{})
 			if a.Type == "map" {
-				vcs := strings.Split(a.Vc, ",")
-				vc, _ := strconv.Atoi(vcs[0])
+				vcs := strings.Split(a.Vs, ",")
+				vc, err := strconv.Atoi(vcs[0])
+				if err != nil {
+					vc = colNameToNumber(vcs[0])
+				}
+				nc, err := strconv.Atoi(a.Ns)
+				if err != nil {
+					nc = colNameToNumber(a.Ns)
+				}
+				//TODO vsheet.Rows[0] as Header
 				for _, r := range vsheet.Rows[1:] {
 					//v0 := r.Cells[a.Vc-1].String() //TODO vc is ints
 					v0 := r.Cells[vc-1].String()
-					k0 := r.Cells[a.Nc-1].String()
+					k0 := r.Cells[nc-1].String()
 					//m0.AddURI(v0, k0)
 					data[k0] = v0
 
 				}
 			} else {
-				vcs := strings.Split(a.Vc, ",")
-				vc, _ := strconv.Atoi(vcs[0])
+				vcs := strings.Split(a.Vs, ",")
+				vc, err := strconv.Atoi(vcs[0])
+				if err != nil {
+					vc = colNameToNumber(vcs[0])
+				}
+				nc, err := strconv.Atoi(a.Ns)
+				if err != nil {
+					nc = colNameToNumber(a.Ns)
+				}
+				log.Println(nc, vc)
 				if len(vcs) == 1 {
 					for _, r := range vsheet.Rows[1:] {
-						id := r.Cells[a.Nc-1].String()
+						id := r.Cells[nc-1].String()
 						loc := r.Cells[vc-1].String() //TODO Vc To ints
 						var uri string
 						if httpP.MatchString(loc) || httpsP.MatchString(loc) {
@@ -96,22 +124,34 @@ func parseXls(uri string) ([]dataIndex, error) {
 						}
 					}
 				} else {
+					vci := make([]int, len(vcs))
+					for i, k := range vcs {
+						v, err := strconv.Atoi(k)
+						if err != nil {
+							v = colNameToNumber(k)
+						}
+						vci[i] = v
+					}
+					header := make([]string, len(vcs))
+
+					for i := 0; i < len(vcs); i++ {
+						header[i] = vsheet.Rows[0].Cells[vci[i]-1].String()
+					}
 					for _, r := range vsheet.Rows[1:] {
-						id := r.Cells[a.Nc-1].String()
-						loc := r.Cells[vc-1].String() //TODO Vc To ints
+						id := r.Cells[nc-1].String()
+						loc := r.Cells[vc-1].String()
 						vals := make([]string, len(vcs))
-						for i, k := range vcs {
-							v, _ := strconv.Atoi(k)
-							vals[i] = r.Cells[v-1].String()
+						for i, k := range vci {
+							vals[i] = r.Cells[k-1].String()
 						}
 						var uri string
 						if httpP.MatchString(loc) || httpsP.MatchString(loc) {
-							data[id] = vals
+							data[id] = objectFactory(header, vals)
 						} else {
 							uri = path.Join(root, loc) //TODO
 							vals[0] = uri
 							if _, err := os.Stat(uri); err == nil {
-								data[id] = vals
+								data[id] = objectFactory(header, vals)
 							} else {
 								log.Println("WARNING!!! cannot reading", uri, id)
 							}
