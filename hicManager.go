@@ -23,6 +23,9 @@ func (m *HicManager) SetAttr(key string, value map[string]interface{}) error {
 	m.valueMap[key] = value
 	return nil
 }
+func (m *HicManager) GetAttr(key string) map[string]interface{} {
+	return m.valueMap[key]
+}
 func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	vhic, err := hic.DataReader(reader)
 	if err != nil {
@@ -68,9 +71,15 @@ func (m *HicManager) List() []string {
 func (m *HicManager) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		jsonHic, _ := json.Marshal(m.uriMap)
-		w.Write(jsonHic)
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(m.uriMap)
+			w.Write(jsonHic)
+		} else {
+			jsonAttr, _ := json.Marshal(m.valueMap)
+			w.Write(jsonAttr)
+		}
 	})
 	AddHicsHandle(router, m.dataMap, prefix)
 }

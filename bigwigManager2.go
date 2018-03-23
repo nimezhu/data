@@ -138,6 +138,9 @@ func (m *BigWigManager2) SetAttr(key string, value map[string]interface{}) error
 	m.valueMap[key] = value
 	return nil
 }
+func (m *BigWigManager2) GetAttr(key string) map[string]interface{} {
+	return m.valueMap[key]
+}
 func (m *BigWigManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
@@ -171,7 +174,6 @@ func (m *BigWigManager2) AddURI(uri string, key string) error {
 	m.uriMap[key] = uri
 	var err error
 	m.bwMap[key], err = m.readBw(uri)
-	log.Println("add uri", uri, key)
 	return err
 }
 func (m *BigWigManager2) Del(key string) error {
@@ -202,12 +204,22 @@ func (m *BigWigManager2) List() []string {
 	}
 	return keys
 }
+
+/* TODO ls Add Attr */
 func (m *BigWigManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		jsonHic, _ := json.Marshal(m.uriMap) //not only uriMap ... but also attrs.
-		w.Write(jsonHic)
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(m.uriMap)
+			w.Write(jsonHic)
+		} else {
+			jsonAttr, _ := json.Marshal(m.valueMap)
+			w.Write(jsonAttr)
+		}
+		//not only uriMap ... but also attrs.
+
 	})
 	AddBwsHandle(router, m.bwMap, prefix)
 }

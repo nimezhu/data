@@ -82,6 +82,9 @@ func (m *BigBedManager2) SetAttr(key string, value map[string]interface{}) error
 	m.valueMap[key] = value
 	return nil
 }
+func (m *BigBedManager2) GetAttr(key string) map[string]interface{} {
+	return m.valueMap[key]
+}
 func (m *BigBedManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
@@ -160,9 +163,15 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		jsonHic, _ := json.Marshal(m.uriMap)
-		w.Write(jsonHic)
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(m.uriMap)
+			w.Write(jsonHic)
+		} else {
+			jsonAttr, _ := json.Marshal(m.valueMap)
+			w.Write(jsonAttr)
+		}
 	})
 
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {

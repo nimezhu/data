@@ -87,7 +87,9 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-/* readSheet is 1-index */
+/* readSheet is 1-index
+ *  TODO: Add More Interfaces Such as translate A,B,C,D or Sheet Header
+ */
 func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string]interface{} {
 	if len(valueIdxs) == 1 {
 		a := make(map[string]interface{})
@@ -112,7 +114,6 @@ func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx in
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet. %v", err)
 	}
-	fmt.Println("Reading ", id)
 	r := make(map[string][]string)
 	l := len(valueIdxs)
 	if len(resp.Values) > 0 {

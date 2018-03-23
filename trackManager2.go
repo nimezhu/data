@@ -119,9 +119,23 @@ func (m *TrackManager2) Del(k string) error {
 func (m *TrackManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		jsonHic, _ := json.Marshal(m.uriMap)
-		w.Write(jsonHic)
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(m.uriMap)
+			w.Write(jsonHic)
+		} else {
+			//TODO PRECOMPUTING ??
+			retv := make(map[string]map[string]interface{})
+			for _, m0 := range m.managers {
+				for _, k := range m0.List() {
+					retv[k] = m0.GetAttr(k)
+				}
+			}
+			jsonAttr, _ := json.Marshal(retv)
+			w.Write(jsonAttr)
+
+		}
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

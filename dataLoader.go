@@ -64,6 +64,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 					switch val.(type) {
 					case string:
 						a.AddURI(val.(string), key)
+						a.SetAttr(key, map[string]interface{}{"uri": val})
 					case map[string]interface{}:
 						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
@@ -88,6 +89,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 					switch val.(type) {
 					case string:
 						a.AddURI(val.(string), key)
+						a.SetAttr(key, map[string]interface{}{"uri": val})
 					case map[string]interface{}:
 						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
@@ -113,6 +115,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 					switch val.(type) {
 					case string:
 						a.AddURI(val.(string), key)
+						a.SetAttr(key, map[string]interface{}{"uri": val})
 					case map[string]interface{}:
 						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
