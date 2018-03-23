@@ -89,47 +89,58 @@ func saveToken(file string, token *oauth2.Token) {
 
 /* readSheet is 1-index
  *  TODO: Add More Interfaces Such as translate A,B,C,D or Sheet Header
+ *  TODO 101 : Return Column Names
  */
-func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string]interface{} {
+func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) ([]string, map[string]interface{}) {
 	if len(valueIdxs) == 1 {
 		a := make(map[string]interface{})
 		m := _readSheetToStringMap(id, srv, spreadsheetId, nameIdx, valueIdxs[0])
 		for k, v := range m {
 			a[k] = v
 		}
-		return a
+		return nil, a
 	} else {
 		a := make(map[string]interface{})
-		m := _readSheet(id, srv, spreadsheetId, nameIdx, valueIdxs)
+		h, m := _readSheet(id, srv, spreadsheetId, nameIdx, valueIdxs) //TODO handle header
 		for k, v := range m {
 			a[k] = v
 		}
-		return a
+		return h, a
 	}
-	return nil
+	return nil, nil
 }
-func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) map[string][]string {
-	readRange := id + "!A2:ZZ"
+
+/*
+ * TODO:
+ */
+func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) ([]string, map[string][]string) {
+	readRange := id + "!A1:ZZ" //TODO: READ FIRST LINE AS NAMES
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet. %v", err)
 	}
+	header := make([]string, len(valueIdxs))
 	r := make(map[string][]string)
 	l := len(valueIdxs)
 	if len(resp.Values) > 0 {
-		for _, row := range resp.Values {
-			// Print columns A and E, which correspond to indices 0 and 4.
-			s := make([]string, l)
-			for i, k := range valueIdxs {
-				s[i] = row[k-1].(string)
+		for i0, row := range resp.Values {
+			if i0 == 0 {
+				//handle header
+				for i, k := range valueIdxs {
+					header[i] = row[k-1].(string)
+				}
+			} else {
+				s := make([]string, l)
+				for i, k := range valueIdxs {
+					s[i] = row[k-1].(string)
+				}
+				r[row[nameIdx-1].(string)] = s
 			}
-			r[row[nameIdx-1].(string)] = s
 		}
 	} else {
 		fmt.Print("No data found.")
 	}
-	fmt.Println(r)
-	return r
+	return header, r
 }
 
 /* readSheetToStringMap is 1-index */

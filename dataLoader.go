@@ -66,7 +66,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 						a.AddURI(val.(string), key)
 						a.SetAttr(key, map[string]interface{}{"uri": val})
 					case map[string]interface{}:
-						if uri, ok := val.(map[string]interface{})["uri"]; ok {
+						if uri, ok := val.(map[string]interface{})["ur"]; ok {
 							a.AddURI(uri.(string), key)
 							a.SetAttr(key, val.(map[string]interface{}))
 						}
@@ -272,10 +272,13 @@ func _parseToBedImage(d map[string]interface{}) []bedImage {
 	r := make([]bedImage, len(d))
 	i := 0
 	for k, v := range d {
+		v0 := v.(map[string]interface{})
+		location, _ := v0["Location"]
+		position, _ := v0["Position"]
 		r[i] = bedImage{
 			k,
-			v.([]string)[0],
-			parseRegions(v.([]string)[1]),
+			location.(string),
+			parseRegions(position.(string)),
 		}
 		i++
 	}

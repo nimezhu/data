@@ -11,6 +11,19 @@ import (
 	sheets "google.golang.org/api/sheets/v4"
 )
 
+//TODO: dataIndex data mv to map[string]interface{}
+//      based on header
+func objectFactory(keys []string, values []string) map[string]interface{} {
+	if len(keys) != len(values) {
+		return nil
+	}
+	retv := make(map[string]interface{})
+	for i := 0; i < len(keys); i++ {
+		retv[keys[i]] = values[i]
+	}
+	return retv
+}
+
 func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
@@ -38,7 +51,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	if err != nil {
 		log.Fatalf("Unable to retrieve Sheets Client %v", err)
 	}
-	c := readSheet("Config", srv, spreadsheetId, 1, []int{2})
+	_, c := readSheet("Config", srv, spreadsheetId, 1, []int{2}) //header TODO
 	index := readIndex(srv, spreadsheetId)
 	root, _ := c["root"]
 
@@ -51,7 +64,9 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		}
 		//TODO add Interface For Complicated Data Input multi Columns.
 		var s map[string]interface{}
-		s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //TODO GET FROM INDEX
+		var h []string
+		h, s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //header TODO
+		log.Println("TODO Handle Header", h)
 		format := v
 		data := make(map[string]interface{})
 		if len(e.Vc) == 1 {
@@ -79,14 +94,19 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		} else { //Vc columns > 1
 			for id, vals := range s {
 				var uri string
+				//TODO Add MORE TOLERATE GUESS URI INDEX FROM HEADER
 				loc := vals.([]string)[0]
 				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
 					data[id] = vals
 				} else {
 					uri = path.Join(root.(string), loc) //TODO
 					if _, err := os.Stat(uri); err == nil {
+						//TODO Add MORE TOLERATE GUESS URI INDEX FROM HEADER
 						vals.([]string)[0] = uri
-						data[id] = vals
+						//data[id] = vals //TODO Add Vals Mapping to value Map handle h here
+						//map[string]
+						//convert vals to map[string]interface{}
+						data[id] = objectFactory(h, vals.([]string))
 					} else {
 						log.Println("WARNING!!! cannot reading", uri, id)
 					}

@@ -140,8 +140,26 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		a := make([]map[string]string, 0)
+		//TODO fix this for trackAgent
+		attr, ok := r.URL.Query()["attr"]
+		sign := true
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			sign = false
+		}
+
 		for k, _ := range m.uriMap {
 			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
+			if sign {
+				attrs := m.managers[m.formatMap[k]].GetAttr(k)
+				for k0, v0 := range attrs {
+					switch v0.(type) {
+					case string:
+						a[len(a)-1][k0] = v0.(string)
+					default:
+
+					}
+				}
+			}
 		}
 		jsonHic, _ := json.Marshal(a)
 		w.Write(jsonHic)
