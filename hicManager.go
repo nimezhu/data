@@ -23,8 +23,9 @@ func (m *HicManager) SetAttr(key string, value map[string]interface{}) error {
 	m.valueMap[key] = value
 	return nil
 }
-func (m *HicManager) GetAttr(key string) map[string]interface{} {
-	return m.valueMap[key]
+func (m *HicManager) GetAttr(key string) (map[string]interface{}, bool) {
+	v, ok := m.valueMap[key]
+	return v, ok
 }
 func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	vhic, err := hic.DataReader(reader)

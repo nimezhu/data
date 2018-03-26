@@ -7,14 +7,14 @@ import (
 
 func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 	if format != "track" {
-		log.Println("not support refresh this format ", format)
+		log.Println("not support refresh this format yet, format:", format)
 		return errors.New("not support this format refresh yet")
 	}
 	if r, ok := e.Data[dbname]; ok {
 		log.Println("refresh ", dbname)
 		newdata := data.(map[string]interface{})
 		newr := r.(*TrackManager2)
-		/* Delete OLD */
+		/* Delete OLD inteface could be string or map[string]interface */
 		for _, k := range newr.List() {
 			if _, ok := newdata[k]; !ok {
 				err := newr.Del(k)
@@ -25,22 +25,52 @@ func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 		}
 		/* Update New */
 		for k, v := range newdata {
-			v0 := v.(string)
-			/* if not loaded before */
-			if v1, ok := newr.Get(k); !ok {
-				newr.AddURI(v0, k)
-			} else {
-				/* if uri changed  */
-				if v1 != v0 {
+			// add case v.(type) here
+			switch v.(type) {
+			case string:
+				v0 := v.(string)
+				if v1, ok := newr.Get(k); !ok {
+					newr.AddURI(v0, k)
+				} else if v1 != v0 {
 					newr.Del(k)
 					newr.AddURI(v0, k)
 				}
+			case map[string]interface{}:
+				//TODO
+				v0 := v.(map[string]interface{})
+				if v1, ok := newr.GetAttr(k); !ok {
+					/* ADD NEW ENTRY */
+					if uri, ok := v0["uri"]; ok {
+						newr.AddURI(uri.(string), k)
+						newr.SetAttr(k, v0)
+					}
+				} else {
+					/* UPDATE ENTRY */
+					if uri, ok := v0["uri"]; ok {
+						if olduri, ok := v1["uri"].(string); ok {
+							/* ONLY UPDATE ATTRS */
+							if olduri == uri.(string) {
+								newr.SetAttr(k, v0)
+							} else {
+								/* UPDATE DATA URI */
+								newr.Del(k)
+								newr.AddURI(uri.(string), k)
+								newr.SetAttr(k, v0)
+							}
+						}
+					}
+
+				}
+
 			}
+
 		}
+		//TODO RERFESH jdata entry and gdb
 		log.Println("refresh done")
 	} else {
 		log.Println("not found db", dbname)
 		return errors.New("db not found")
 	}
+
 	return nil
 }

@@ -42,7 +42,7 @@ type Manager interface {
 type Manager2 interface { //Version2  to add attrs
 	Manager
 	SetAttr(key string, values map[string]interface{}) error
-	GetAttr(key string) map[string]interface{}
+	GetAttr(key string) (map[string]interface{}, bool)
 }
 type Entry struct {
 	Name string

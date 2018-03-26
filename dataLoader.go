@@ -12,6 +12,9 @@ type Loader struct {
 	IndexRoot string
 	Plugins   map[string]func(string, interface{}) (DataRouter, error)
 	Data      map[string]DataRouter
+	entry     []string
+	jdata     []map[string]string
+	gdb       map[string][]map[string]string
 }
 
 var (
@@ -38,7 +41,7 @@ func (e *Loader) AddLoader(format string, f func(string, interface{}) (DataRoute
 	return nil
 }
 func NewLoader(root string) *Loader {
-	return &Loader{root, make(map[string]func(string, interface{}) (DataRouter, error)), make(map[string]DataRouter)}
+	return &Loader{root, make(map[string]func(string, interface{}) (DataRouter, error)), make(map[string]DataRouter), make([]string, 0, 0), make([]map[string]string, 0, 0), make(map[string][]map[string]string)}
 }
 
 func (e *Loader) Factory(dbname string, data interface{}, format string) func(string, interface{}) (DataRouter, error) {
@@ -66,7 +69,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 						a.AddURI(val.(string), key)
 						a.SetAttr(key, map[string]interface{}{"uri": val})
 					case map[string]interface{}:
-						if uri, ok := val.(map[string]interface{})["ur"]; ok {
+						if uri, ok := val.(map[string]interface{})["uri"]; ok {
 							a.AddURI(uri.(string), key)
 							a.SetAttr(key, val.(map[string]interface{}))
 						}

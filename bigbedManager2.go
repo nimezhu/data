@@ -82,8 +82,9 @@ func (m *BigBedManager2) SetAttr(key string, value map[string]interface{}) error
 	m.valueMap[key] = value
 	return nil
 }
-func (m *BigBedManager2) GetAttr(key string) map[string]interface{} {
-	return m.valueMap[key]
+func (m *BigBedManager2) GetAttr(key string) (map[string]interface{}, bool) {
+	v, ok := m.valueMap[key]
+	return v, ok
 }
 func (m *BigBedManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	m.uriMap[key] = uri

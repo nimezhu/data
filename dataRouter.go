@@ -161,12 +161,15 @@ func trans(v dataIndex) map[string]string {
 	}
 	return nil
 }
+
+//TODO ADD Refresh Indexes
 func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	//add genome versions .
 	fail := 0
 	//todo entry data and genomes in loader.
-	entry := []string{}
-	jdata := []map[string]string{}
+	//event driven to reload entry and jdata?
+	//entry := []string{}
+	//jdata := []map[string]string{}
 	gs := map[string][]dataIndex{}
 	for _, v := range indexes {
 		if v.genome != "all" {
@@ -179,34 +182,32 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			if err != nil {
 				fail += 1
 			} else {
-				jdata = append(jdata, trans(v))
-				entry = append(entry, v.dbname)
+				m.jdata = append(m.jdata, trans(v))
+				m.entry = append(m.entry, v.dbname)
 			}
 		}
 	}
-	gdb := map[string][]map[string]string{}
+	//gdb := map[string][]map[string]string{}
 	for g, v := range gs {
 		log.Println("Loading Genome Data ", g)
-		gdb[g] = []map[string]string{}
+		m.gdb[g] = []map[string]string{}
 		for _, v0 := range v {
 			err := m.loadIndex(v0, router)
 			if err != nil {
 				fail += 1
 			} else {
-				gdb[g] = append(gdb[g], trans(v0))
+				m.gdb[g] = append(m.gdb[g], trans(v0))
 			}
 		}
 	}
-	/** TODO
-			/consider reload problem too.
-	 **/
+
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
-		e, _ := json.Marshal(entry)
+		e, _ := json.Marshal(m.entry)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
-		e, _ := json.Marshal(jdata)
+		e, _ := json.Marshal(m.jdata)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Write(e)
 	})
@@ -238,7 +239,7 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Write(e)
 			})
-		}(k, gdb[k])
+		}(k, m.gdb[k])
 	}
 	//add json and list to router
 	if fail > 0 {

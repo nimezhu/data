@@ -77,6 +77,12 @@ func (m *TrackManager2) SetAttr(key string, values map[string]interface{}) error
 	}
 	return errors.New("not found manager")
 }
+func (m *TrackManager2) GetAttr(key string) (map[string]interface{}, bool) {
+	if _, ok := m.formatMap[key]; !ok {
+		return nil, false
+	}
+	return m.managers[m.formatMap[key]].GetAttr(key)
+}
 func (m *TrackManager2) Add(key string, reader io.ReadSeeker, uri string) error {
 	format, _ := indexed.MagicReadSeeker(reader)
 	if format == "hic" || format == "bigwig" || format == "bigbed" {
@@ -129,7 +135,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 			retv := make(map[string]map[string]interface{})
 			for _, m0 := range m.managers {
 				for _, k := range m0.List() {
-					retv[k] = m0.GetAttr(k)
+					retv[k], _ = m0.GetAttr(k)
 				}
 			}
 			jsonAttr, _ := json.Marshal(retv)
@@ -150,13 +156,14 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 		for k, _ := range m.uriMap {
 			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
 			if sign {
-				attrs := m.managers[m.formatMap[k]].GetAttr(k)
-				for k0, v0 := range attrs {
-					switch v0.(type) {
-					case string:
-						a[len(a)-1][k0] = v0.(string)
-					default:
+				if attrs, ok := m.managers[m.formatMap[k]].GetAttr(k); ok {
+					for k0, v0 := range attrs {
+						switch v0.(type) {
+						case string:
+							a[len(a)-1][k0] = v0.(string)
+						default:
 
+						}
 					}
 				}
 			}
