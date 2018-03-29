@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/indexed"
