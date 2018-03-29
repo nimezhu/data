@@ -15,7 +15,6 @@ import (
 )
 
 //TODO Load Indexes From gsheet and xls
-//TODO dataIndexes with attrs ...
 //TODO DATAURI SYSTEM
 //TODO SERVER / GENOME(VERSION) / NAME
 //TODO LS Parameters Get Specific Attrs Such as longLabels
@@ -200,7 +199,7 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			}
 		}
 	}
-
+	//TODO ADD REFRESH ADD OR RM SHEETS
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.entry)
 		w.Header().Set("Access-Control-Allow-Origin", "*")

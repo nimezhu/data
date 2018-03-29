@@ -85,14 +85,22 @@ func (m *TrackManager) AddURI(uri string, key string) error {
 	m.formatMap[key] = format
 	m.uriMap[key] = uri
 	//HANDLE binindex in mem
-	if format == "binindex" {
-		m.uriMap[key] = strings.Replace(uri, "binindex:", "", 1)
-		return nil
-	}
+	/*
+		if format == "binindex" {
+			m.uriMap[key] = strings.Replace(uri, "_format_:binindex:", "", 1)
+			return nil
+		}
+	*/
 	if _, ok := m.managers[format]; !ok {
-		m.managers[format] = newManager(m.id, format)
+		if _m := newManager(m.id, format); _m != nil {
+			m.managers[format] = _m
+			m.managers[format].AddURI(uri, key)
+		} else {
+			return errors.New("format not support yet")
+		}
+	} else {
+		m.managers[format].AddURI(uri, key)
 	}
-	m.managers[format].AddURI(uri, key)
 	return nil
 }
 
@@ -129,21 +137,23 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 		format, _ := m.formatMap[id]
 		//w.Write([]byte(code))
 		//TODO redirect with format
-		if format == "binindex" { //binindex in memory
-			uri, _ := m.uriMap[id] //name
-			a1 := strings.Replace(r.URL.String(), prefix+"/", "", 1)
-			a2 := strings.Replace(a1, id, uri, 1)
-			//url := "/" + uri + "/" + cmd
-			//fmt.Println(a2)
-			//fmt.Println(url)
-			url := "/" + a2
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		} else {
-			url := prefix + "." + format + "/" + id + "/" + cmd
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		}
+		/*
+			if format == "binindex" { //binindex in memory
+				uri, _ := m.uriMap[id] //name
+				a1 := strings.Replace(r.URL.String(), prefix+"/", "", 1)
+				a2 := strings.Replace(a1, id, uri, 1)
+				//url := "/" + uri + "/" + cmd
+				//fmt.Println(a2)
+				//fmt.Println(url)
+				url := "/" + a2
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+			} else {
+		*/
+		url := prefix + "." + format + "/" + id + "/" + cmd
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		//}
 	})
 	for _, v := range m.managers {
 		v.ServeTo(router)
