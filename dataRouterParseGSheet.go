@@ -28,7 +28,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
-	binindexP, _ := regexp.Compile("^binindex:")
+	myFormatP, _ := regexp.Compile("^_format_:\\S+:\\S+$")
 
 	ctx := context.Background()
 
@@ -77,7 +77,8 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 			} else { //for file
 				for id, loc := range s {
 					var uri string
-					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) || binindexP.MatchString(loc.(string)) {
+					// Add MORE TOLERATE GUESS URI INDEX FROM HEADER add support _format_:[format]:[uri]
+					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) || myFormatP.MatchString(loc.(string)) {
 						uri = loc.(string)
 						data[id] = uri
 					} else {
@@ -94,9 +95,10 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		} else { //Vc columns > 1
 			for id, vals := range s {
 				var uri string
-				//TODO Add MORE TOLERATE GUESS URI INDEX FROM HEADER
+				//TODO
+				// Add MORE TOLERATE GUESS URI INDEX FROM HEADER add support _format_:[format]:[uri]
 				loc := vals.([]string)[0]
-				if httpP.MatchString(loc) || httpsP.MatchString(loc) {
+				if httpP.MatchString(loc) || httpsP.MatchString(loc) || myFormatP.MatchString(loc) {
 					data[id] = vals
 				} else {
 					uri = path.Join(root.(string), loc) //TODO

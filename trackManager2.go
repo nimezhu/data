@@ -98,17 +98,23 @@ func (m *TrackManager2) Add(key string, reader io.ReadSeeker, uri string) error 
 }
 func (m *TrackManager2) AddURI(uri string, key string) error {
 	format, _ := indexed.Magic(uri)
-	m.formatMap[key] = format
-	m.uriMap[key] = uri
 	//HANDLE binindex in mem
 	if format == "binindex" {
-		m.uriMap[key] = strings.Replace(uri, "binindex:", "", 1)
+		m.uriMap[key] = strings.Replace(uri, "_format_:binindex:", "", 1)
 		return nil
 	}
 	if _, ok := m.managers[format]; !ok {
-		m.managers[format] = _newManager2(m.id, format, m.root)
+		if _m := _newManager2(m.id, format, m.root); _m != nil {
+			m.managers[format] = _m
+			m.managers[format].AddURI(uri, key)
+		} else {
+			return errors.New("format not support yet")
+		}
+	} else {
+		m.managers[format].AddURI(uri, key)
 	}
-	m.managers[format].AddURI(uri, key)
+	m.formatMap[key] = format
+	m.uriMap[key] = uri
 	return nil
 }
 
