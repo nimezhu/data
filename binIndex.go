@@ -1,6 +1,9 @@
 package data
 
-import "errors"
+import (
+	"errors"
+	"log"
+)
 
 var (
 	binOffsets    = []uint{512 + 64 + 8 + 1, 64 + 8 + 1, 8 + 1, 1, 0}
@@ -153,6 +156,22 @@ func (d *BinIndexMap) Query(b BedI) (<-chan NamedRangeI, error) { // need to ref
 }
 
 /* TODO Delete */
-func (c *BinIndexMap) Delete(b BedI) error {
+func (d *BinIndexMap) Delete(b NamedBedI) error {
+	chr, ok := d.Data[b.Chr()]
+	if !ok {
+		return errors.New("chr not found")
+	}
+	for bin := range iterRangeOverlapBins(uint(b.Start()), uint(b.End())) {
+		if values, ok := chr[int(bin)]; ok {
+			for i, v := range values {
+				if v.Id() == b.Id() && v.Start() == b.Start() && v.End() == b.End() {
+					values = append(values[:i], values[i+1:]...)
+					log.Println("delete", i)
+					chr[int(bin)] = values
+					break
+				}
+			}
+		}
+	}
 	return nil
 }
