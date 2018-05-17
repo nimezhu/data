@@ -102,10 +102,10 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		params := mux.Vars(r)
 		id := params["id"]
-		a, ok := T.dataMap[id]
-		if ok {
-			jsonChr, _ := json.Marshal(a.Names())
-			w.Write(jsonChr)
+		if _, ok := T.dataMap[id]; ok {
+			//jsonChr, _ := json.Marshal(a.Names()) //TODO FIX
+			//w.Write(jsonChr)
+			w.Write([]byte("TODO CHRS"))
 		} else {
 			fmt.Println("can not find id", id)
 		}
