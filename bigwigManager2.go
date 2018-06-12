@@ -93,7 +93,7 @@ func (m *BigWigManager2) readBw(uri string) (*bbi.BigWigReader, error) {
 	checkErr(err)
 	bwf := bbi.NewBbiReader(reader)
 	fn, mode := checkUri(uri, m.indexRoot)
-	log.Println(fn, mode)
+	log.Println("load", uri, mode)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {
