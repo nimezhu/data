@@ -202,12 +202,12 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	//TODO ADD REFRESH ADD OR RM SHEETS
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.entry)
-		
+
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.jdata)
-		
+
 		w.Write(e)
 	})
 	router.HandleFunc("/genomes", func(w http.ResponseWriter, r *http.Request) {
@@ -216,30 +216,58 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			g = append(g, k)
 		}
 		e, _ := json.Marshal(g)
-		
+
 		w.Write(e)
 	})
-	for k, v := range gs {
-		go func(k string, v []dataIndex) {
-			router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
-				u := []string{}
-				fmt.Println("list", k)
-				for _, v0 := range v {
-					u = append(u, v0.dbname)
-				}
-				e, _ := json.Marshal(u)
-				
-				w.Write(e)
-			})
-		}(k, v)
-		go func(k string, e []map[string]string) {
-			router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
-				e, _ := json.Marshal(e)
-				
-				w.Write(e)
-			})
-		}(k, m.gdb[k])
-	}
+
+	/* FIX GENOME NOT EXISTS */
+	/* TODO */
+	router.HandleFunc("/{genome}/ls", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		k := vars["genome"]
+		if e, ok := m.gdb[k]; ok {
+			e, _ := json.Marshal(e)
+			w.Write(e)
+		} else {
+			w.Write([]byte("[]"))
+		}
+	})
+	router.HandleFunc("/{genome}/list", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		k := vars["genome"]
+		if v, ok := gs[k]; ok {
+			u := []string{}
+			for _, v0 := range v {
+				u = append(u, v0.dbname)
+			}
+			e, _ := json.Marshal(u)
+			w.Write(e)
+		} else {
+			w.Write([]byte("[]"))
+		}
+	})
+	/*
+		for k, v := range gs {
+			go func(k string, v []dataIndex) {
+				router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
+					u := []string{}
+					for _, v0 := range v {
+						u = append(u, v0.dbname)
+					}
+					e, _ := json.Marshal(u)
+
+					w.Write(e)
+				})
+			}(k, v)
+			go func(k string, e []map[string]string) {
+				router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
+					e, _ := json.Marshal(e)
+
+					w.Write(e)
+				})
+			}(k, m.gdb[k])
+		}
+	*/
 	//add json and list to router
 	if fail > 0 {
 		return errors.New(fmt.Sprintf("Fail loading %d / %d database", fail, len(indexes)))
