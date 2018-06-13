@@ -14,7 +14,7 @@ import (
 
 func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix string) {
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}/{width}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		chr := params["chr"]
 		id := params["id"]
@@ -33,7 +33,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/getjson/{chr}:{start}-{end}/{width}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -57,7 +57,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) { //BinSize Corrected.
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -85,7 +85,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -114,7 +114,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		bw, ok := bwMap[id]
@@ -127,7 +127,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/binsize/{length}/{width}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		length, _ := strconv.Atoi(params["length"])
@@ -143,7 +143,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/binsizes", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		params := mux.Vars(r)
 		id := params["id"]
 		bw, ok := bwMap[id]
@@ -156,7 +156,7 @@ func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader, prefix str
 		}
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		var keys []string
 		for k := range bwMap {
 			keys = append(keys, k)

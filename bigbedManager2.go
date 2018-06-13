@@ -155,7 +155,7 @@ func (m *BigBedManager2) List() []string {
 func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		keys := []string{}
 		for key, _ := range m.uriMap {
 			keys = append(keys, key)
@@ -165,7 +165,7 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	})
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -176,7 +176,7 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	})
 
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		a, ok := m.dataMap[id]
@@ -189,7 +189,7 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	})
 
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chrom := params["chr"]
@@ -203,7 +203,7 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	})
 
 	router.HandleFunc(prefix+"/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]

@@ -116,12 +116,12 @@ func (m *TrackManager) Del(k string) error {
 func (m *TrackManager) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		a := make([]map[string]string, 0)
 		for k, _ := range m.uriMap {
 			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
@@ -145,12 +145,12 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 				//fmt.Println(a2)
 				//fmt.Println(url)
 				url := "/" + a2
-				w.Header().Set("Access-Control-Allow-Origin", "*")
+				
 				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 			} else {
 		*/
 		url := prefix + "." + format + "/" + id + "/" + cmd
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		//}
 	})

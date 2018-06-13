@@ -163,7 +163,7 @@ func (m *TabixImageManager) List() []string {
 func (T *TabixImageManager) ServeTo(router *mux.Router) {
 	prefix := "/" + T.dbname
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		keys := []string{}
 		for key, _ := range T.uriMap {
 			keys = append(keys, key)
@@ -172,12 +172,12 @@ func (T *TabixImageManager) ServeTo(router *mux.Router) {
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		jsonHic, _ := json.Marshal(T.uriMap)
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 
@@ -190,7 +190,7 @@ func (T *TabixImageManager) ServeTo(router *mux.Router) {
 		}
 	})
 	router.HandleFunc(prefix+"/getpos/{id}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		if v, ok := T.imageToRegions[id]; ok {
@@ -201,7 +201,7 @@ func (T *TabixImageManager) ServeTo(router *mux.Router) {
 
 	})
 	router.HandleFunc(prefix+"/images/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		io.WriteString(w, "id\tpos\n")
 		for k, v := range T.imageToRegions {
 			s := fmt.Sprintf("%s\t%s\n", k, v)
@@ -209,7 +209,7 @@ func (T *TabixImageManager) ServeTo(router *mux.Router) {
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chrom := params["chr"]

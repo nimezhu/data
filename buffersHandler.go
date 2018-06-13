@@ -23,7 +23,7 @@ func AddBuffersHandle(router *mux.Router, uriMap map[string]string, prefix strin
 		}
 	}
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		keys := []string{}
 		for key, _ := range bufferMap {
 			keys = append(keys, key)
@@ -32,7 +32,7 @@ func AddBuffersHandle(router *mux.Router, uriMap map[string]string, prefix strin
 		w.Write(jsonBuffers)
 	})
 	router.HandleFunc(prefix+"/get/{id}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		content, ok := bufferMap[id]

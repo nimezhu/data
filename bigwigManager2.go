@@ -211,7 +211,7 @@ func (m *BigWigManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)

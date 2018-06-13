@@ -41,17 +41,17 @@ func (m *MapManager) Move(key1 string, key2 string) bool {
 }
 func (m *MapManager) ServeTo(router *mux.Router) {
 	router.HandleFunc("/"+m.name+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		jsonHic, _ := json.Marshal(m.data)
 		w.Write(jsonHic)
 	})
 	router.HandleFunc("/"+m.name+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		jsonHic, _ := json.Marshal(m.List())
 		w.Write(jsonHic)
 	})
 	router.HandleFunc("/"+m.name+"/get/{id}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		content, ok := m.data[id]

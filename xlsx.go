@@ -111,12 +111,12 @@ func AddSheets(uri string, router *mux.Router) map[string]DataManager {
 	}
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(entry)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(jdata)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		w.Write(e)
 	})
 	return m

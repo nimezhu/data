@@ -132,7 +132,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -150,7 +150,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 		}
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		a := make([]map[string]string, 0)
 		//TODO fix this for trackAgent
 		attr, ok := r.URL.Query()["attr"]
@@ -192,11 +192,11 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 			//fmt.Println(a2)
 			//fmt.Println(url)
 			url := "/" + a2
-			w.Header().Set("Access-Control-Allow-Origin", "*")
+			
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		} else {
 			url := prefix + "." + format + "/" + id + "/" + cmd
-			w.Header().Set("Access-Control-Allow-Origin", "*")
+			
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		}
 	})

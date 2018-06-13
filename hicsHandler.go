@@ -14,7 +14,7 @@ import (
 
 func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		/*
 		   io.WriteString(w, "Idx\tName\tLength\n")
 		   for i, v := range hic.Chr {
@@ -31,7 +31,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 	})
 
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		/*
 		   io.WriteString(w, "Idx\tName\tLength\n")
 		   for i, v := range hic.Chr {
@@ -45,7 +45,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		w.Write(jsonChr)
 	})
 	router.HandleFunc(prefix+"/{id}/norms", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		normidx := hicMap[id].Footer.NormTypeIdx()
@@ -53,7 +53,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		w.Write(jsonNormIdx)
 	})
 	router.HandleFunc(prefix+"/{id}/units", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		log.Println(id)
@@ -69,7 +69,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		w.Write(jsonUnits)
 	})
 	router.HandleFunc(prefix+"/{id}/bpres", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		bpres := hicMap[id].BpRes
@@ -81,14 +81,14 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 	})
 
 	router.HandleFunc(prefix+"/{id}/info", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		io.WriteString(w, hicMap[id].String())
 	})
 
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}/{width}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -116,7 +116,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 
 	})
 	router.HandleFunc(prefix+"/{id}/get2d/{chr}:{start}-{end}/{chr2}:{start2}-{end2}/{resIdx}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -142,7 +142,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 
 	})
 	router.HandleFunc(prefix+"/{id}/get2dnorm/{chr}:{start}-{end}/{chr2}:{start2}-{end2}/{resIdx}/{norm}/{unit}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -169,7 +169,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/get2doe/{chr}:{start}-{end}/{chr2}:{start2}-{end2}/{resIdx}/{norm}/{unit}/{format}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]
@@ -196,7 +196,7 @@ func AddHicsHandle(router *mux.Router, hicMap map[string]*HiC, prefix string) {
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/corrected/{chr}:{start}-{end}/{resIdx}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		params := mux.Vars(r)
 		//chr := params["chr"]
 		id := params["id"]

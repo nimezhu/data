@@ -202,12 +202,12 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	//TODO ADD REFRESH ADD OR RM SHEETS
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.entry)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.jdata)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		w.Write(e)
 	})
 	router.HandleFunc("/genomes", func(w http.ResponseWriter, r *http.Request) {
@@ -216,7 +216,7 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			g = append(g, k)
 		}
 		e, _ := json.Marshal(g)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		w.Write(e)
 	})
 	for k, v := range gs {
@@ -228,14 +228,14 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 					u = append(u, v0.dbname)
 				}
 				e, _ := json.Marshal(u)
-				w.Header().Set("Access-Control-Allow-Origin", "*")
+				
 				w.Write(e)
 			})
 		}(k, v)
 		go func(k string, e []map[string]string) {
 			router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
 				e, _ := json.Marshal(e)
-				w.Header().Set("Access-Control-Allow-Origin", "*")
+				
 				w.Write(e)
 			})
 		}(k, m.gdb[k])
