@@ -132,7 +132,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		
+
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -150,7 +150,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 		}
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		a := make([]map[string]string, 0)
 		//TODO fix this for trackAgent
 		attr, ok := r.URL.Query()["attr"]
@@ -177,6 +177,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 		jsonHic, _ := json.Marshal(a)
 		w.Write(jsonHic)
 	})
+	/* TODO DEBUG NO REDIRECT
 	router.HandleFunc(prefix+"/{id}/{cmd:.*}", func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		cmd := params["cmd"]
@@ -192,14 +193,15 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 			//fmt.Println(a2)
 			//fmt.Println(url)
 			url := "/" + a2
-			
+
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		} else {
 			url := prefix + "." + format + "/" + id + "/" + cmd
-			
+
 			http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		}
 	})
+	*/
 	for _, v := range m.managers {
 		v.ServeTo(router)
 	}
