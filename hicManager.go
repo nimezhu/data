@@ -71,9 +71,10 @@ func (m *HicManager) List() []string {
 }
 func (m *HicManager) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		
+
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -82,7 +83,7 @@ func (m *HicManager) ServeTo(router *mux.Router) {
 			w.Write(jsonAttr)
 		}
 	})
-	AddHicsHandle(router, m.dataMap, prefix)
+	AddHicsHandle(sub, m.dataMap)
 }
 
 func NewHicManager(uri string, dbname string) *HicManager {

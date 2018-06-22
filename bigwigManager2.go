@@ -209,9 +209,10 @@ func (m *BigWigManager2) List() []string {
 /* TODO ls Add Attr */
 func (m *BigWigManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		
+
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -222,7 +223,7 @@ func (m *BigWigManager2) ServeTo(router *mux.Router) {
 		//not only uriMap ... but also attrs.
 
 	})
-	AddBwsHandle(router, m.bwMap, prefix)
+	AddBwsHandle(sub, m.bwMap)
 }
 
 func NewBigWigManager2(uri string, dbname string, indexRoot string) *BigWigManager2 {

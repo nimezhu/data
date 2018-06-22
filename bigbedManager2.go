@@ -154,8 +154,9 @@ func (m *BigBedManager2) List() []string {
 
 func (m *BigBedManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
-	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+
 		keys := []string{}
 		for key, _ := range m.uriMap {
 			keys = append(keys, key)
@@ -163,9 +164,9 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 		jsonHic, _ := json.Marshal(keys)
 		w.Write(jsonHic)
 	})
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
-		
+
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
 			jsonHic, _ := json.Marshal(m.uriMap)
 			w.Write(jsonHic)
@@ -175,8 +176,8 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 		}
 	})
 
-	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub.HandleFunc("/{id}/list", func(w http.ResponseWriter, r *http.Request) {
+
 		params := mux.Vars(r)
 		id := params["id"]
 		a, ok := m.dataMap[id]
@@ -188,8 +189,8 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 		}
 	})
 
-	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub.HandleFunc("/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chrom := params["chr"]
@@ -202,8 +203,8 @@ func (m *BigBedManager2) ServeTo(router *mux.Router) {
 		}
 	})
 
-	router.HandleFunc(prefix+"/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub.HandleFunc("/{id}/getbin/{chr}:{start}-{end}/{binsize}", func(w http.ResponseWriter, r *http.Request) {
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chr := params["chr"]

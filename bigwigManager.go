@@ -22,6 +22,7 @@ func readBw(uri string) *bbi.BigWigReader {
 }
 
 /*BigWigManager implement DataManager Inteface */
+
 type BigWigManager struct {
 	uriMap map[string]string
 	bwMap  map[string]*bbi.BigWigReader
@@ -73,12 +74,13 @@ func (m *BigWigManager) List() []string {
 }
 func (m *BigWigManager) ServeTo(router *mux.Router) {
 	prefix := "/" + m.dbname
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
+
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
-	AddBwsHandle(router, m.bwMap, prefix)
+	AddBwsHandle(sub, m.bwMap)
 }
 
 func NewBigWigManager(uri string, dbname string) *BigWigManager {
