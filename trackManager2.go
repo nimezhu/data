@@ -130,7 +130,8 @@ func (m *TrackManager2) Del(k string) error {
 
 func (m *TrackManager2) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
 
 		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
@@ -149,7 +150,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 
 		}
 	})
-	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
+	sub.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 
 		a := make([]map[string]string, 0)
 		//TODO fix this for trackAgent
