@@ -40,18 +40,20 @@ func (m *MapManager) Move(key1 string, key2 string) bool {
 	return false
 }
 func (m *MapManager) ServeTo(router *mux.Router) {
-	router.HandleFunc("/"+m.name+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		
+	prefix := "/" + m.name
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
+
 		jsonHic, _ := json.Marshal(m.data)
 		w.Write(jsonHic)
 	})
-	router.HandleFunc("/"+m.name+"/list", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+
 		jsonHic, _ := json.Marshal(m.List())
 		w.Write(jsonHic)
 	})
-	router.HandleFunc("/"+m.name+"/get/{id}", func(w http.ResponseWriter, r *http.Request) {
-		
+	sub.HandleFunc("/get/{id}", func(w http.ResponseWriter, r *http.Request) {
+
 		params := mux.Vars(r)
 		id := params["id"]
 		content, ok := m.data[id]
