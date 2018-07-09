@@ -129,6 +129,10 @@ func (m *TrackManager2) Del(k string) error {
 }
 
 func (m *TrackManager2) ServeTo(router *mux.Router) {
+	for _, v := range m.managers {
+		v.ServeTo(router)
+	}
+
 	prefix := "/" + m.id
 	sub := router.PathPrefix(prefix).Subrouter()
 	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
@@ -203,9 +207,7 @@ func (m *TrackManager2) ServeTo(router *mux.Router) {
 		}
 	})
 	*/
-	for _, v := range m.managers {
-		v.ServeTo(router)
-	}
+
 }
 
 func (m *TrackManager2) List() []string {
