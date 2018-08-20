@@ -99,7 +99,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 				// Add MORE TOLERATE GUESS URI INDEX FROM HEADER add support _format_:[format]:[uri]
 				loc := vals.([]string)[0]
 				if httpP.MatchString(loc) || httpsP.MatchString(loc) || myFormatP.MatchString(loc) {
-					data[id] = vals
+					data[id] = objectFactory(h, vals.([]string))
 				} else {
 					uri = path.Join(root.(string), loc) //TODO
 					if _, err := os.Stat(uri); err == nil {
