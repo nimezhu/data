@@ -79,8 +79,8 @@ func newDataManager(dbname string, uri string, format string) DataManager {
 		return NewBigBedManager(uri, dbname)
 	case "track":
 		return NewTrackManager(uri, dbname)
-	case "image":
-		return NewTabixImageManager(uri, dbname)
+		//case "image":
+		//	return NewTabixImageManager(uri, dbname)
 	}
 	return nil
 }
@@ -136,12 +136,12 @@ func ReadJsonToManagers(uri string, router *mux.Router) map[string]DataManager {
 	}
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(entry)
-		
+
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(jdata)
-		
+
 		w.Write(e)
 	})
 	//TODO Load Data Manager (loadDataManager)
@@ -177,12 +177,12 @@ func AddDataManagers(uri string, router *mux.Router) map[string]DataManager {
 	}
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(entry)
-		
+
 		w.Write(e)
 	})
 	router.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(jdata)
-		
+
 		w.Write(e)
 	})
 	return m

@@ -20,14 +20,8 @@ type Loader struct {
 var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
 		"file": _fileLoader,
-		//"bigwig": _bigwigLoader_v2,
-		//"bigbed": _bigbedLoader,
-		"hic":   _hicLoader,
-		"map":   _mapLoader,
-		"tabix": _tabixLoader,
-		"image": _imageLoader,
-		"img":   _imgLoader,
-		//"track": _trackLoader,
+		"hic":  _hicLoader,
+		"map":  _mapLoader,
 	}
 )
 
@@ -248,6 +242,8 @@ func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
 	}
 }
 
+/* remove image server support
+
 func _imageLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
@@ -287,19 +283,20 @@ func _parseToBedImage(d map[string]interface{}) []bedImage {
 	}
 	return r
 }
-func parseRegions(txt string) []Bed3 {
+*/
+func parseRegions(txt string) []Bed4 {
 	l := strings.Split(txt, ";")
-	b := make([]Bed3, len(l))
+	b := make([]Bed4, len(l))
 	for i, v := range l {
 		b[i] = parseRegion(v)
 	}
 	return b
 }
-func parseRegion(txt string) Bed3 {
+func parseRegion(txt string) Bed4 {
 	x := strings.Split(txt, ":")
 	chr := x[0]
 	se := strings.Split(x[1], "-")
 	start, _ := strconv.Atoi(se[0])
 	end, _ := strconv.Atoi(se[1])
-	return Bed3{chr, start, end}
+	return Bed4{chr, start, end, "."}
 }

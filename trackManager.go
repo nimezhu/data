@@ -61,9 +61,9 @@ func newManager(prefix string, format string) Manager {
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
 	}
-	if format == "image" {
-		return InitTabixImageManager(prefix + ".image")
-	}
+	//if format == "image" {
+	//	return InitTabixImageManager(prefix + ".image")
+	//}
 	return nil
 }
 func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
@@ -116,12 +116,12 @@ func (m *TrackManager) Del(k string) error {
 func (m *TrackManager) ServeTo(router *mux.Router) {
 	prefix := "/" + m.id
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		a := make([]map[string]string, 0)
 		for k, _ := range m.uriMap {
 			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
@@ -145,12 +145,12 @@ func (m *TrackManager) ServeTo(router *mux.Router) {
 				//fmt.Println(a2)
 				//fmt.Println(url)
 				url := "/" + a2
-				
+
 				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 			} else {
 		*/
 		url := prefix + "." + format + "/" + id + "/" + cmd
-		
+
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		//}
 	})
