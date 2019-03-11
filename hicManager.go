@@ -127,7 +127,7 @@ func InitHicManager(dbname string) *HicManager {
 func readhic(uri string) *hic.HiC {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
-	vhic, err := hic.DataReader(reader)
+	vhic, err := hic.DataReaderLowMem(reader) //Save Memory
 	checkErr(err)
 	return vhic
 }
