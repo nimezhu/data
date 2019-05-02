@@ -111,27 +111,32 @@ func SaveIndex(uri string, root string) error {
 	}
 	return nil
 }
+
+//Test Formats
+//V1
+//V2 : Auto Detect Headers TODO
+func smartCheckSheetHeader(uri string) {
+
+}
+
+/* TODO Smart Detect Named GSheet or Named Xls*/
 func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 	http, _ := regexp.Compile("^http://")
 	https, _ := regexp.Compile("^https://")
-
+	//Add Smart Quick Read Headers Analysis
 	if len(uri) == len("1DEvA94QkN1KZQT51IYOOcIvGL2Ux7Qwqe5IpE9Pe1N8") { //GOOGLE SHEET ID ?
 		if _, err := os.Stat(uri); os.IsNotExist(err) {
 			if !http.MatchString(uri) && !https.MatchString(uri) {
-				//managers = AddGSheets(uri, "client_secret.json", router) //TODO handle client_secret json variable.
 				root := path.Dir(m.IndexRoot)
 				return parseGSheet(uri, root)
-
 			}
 		}
 	} else {
 		ext := path.Ext(uri)
-		if ext == ".json" {
-			return parseJson(uri) //not for obsoleted version
-		} else if ext == ".xlsx" {
+		if ext == ".xlsx" || ext == ".xls" {
 			return parseXls(uri)
 		} else {
-			return parseTxt(uri)
+			return nil, errors.New("not recognize format")
 		}
 	}
 	return nil, errors.New("not recognize uri")

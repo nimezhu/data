@@ -65,6 +65,7 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		//TODO add Interface For Complicated Data Input multi Columns.
 		var s map[string]interface{}
 		var h []string
+		//JUDGE VCs as Name or ColName
 		h, s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //header TODO
 		log.Println("TODO Handle Header", h)
 		format := v

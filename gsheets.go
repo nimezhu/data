@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -110,11 +111,63 @@ func readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int
 	return nil, nil
 }
 
+func readNamedSheet(id string, srv *sheets.Service, spreadsheetId string, nameID string, valueIDs []string) ([]string, map[string]interface{}) {
+	header, err := readSheetHeader(id, srv, spreadsheetId)
+	if err != nil {
+		return nil, nil
+	}
+	nameIdx := -1
+	for i, d := range header {
+		if strings.EqualFold(d, nameID) {
+			nameIdx = i
+			break
+		}
+	}
+	if nameIdx < 0 {
+		return nil, nil
+	}
+	valueIdxs := make([]int, len(valueIDs))
+	for i, v := range valueIDs {
+		valueIdxs[i] = -1
+		for j, d := range header {
+			if strings.EqualFold(d, v) {
+				valueIdxs[i] = j
+				break
+			}
+		}
+		if valueIdxs[i] < 0 {
+			return nil, nil
+		}
+	}
+	return readSheet(id, srv, spreadsheetId, nameIdx, valueIdxs)
+
+}
+func readSheetHeader(id string, srv *sheets.Service, spreadsheetId string) ([]string, error) {
+	readRange := id + "!A1:ZZZ1" //TODO: READ FIRST LINE AS NAMES
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+		return nil, err
+	}
+	if len(resp.Values) > 0 {
+		for i0, row := range resp.Values {
+			if i0 == 0 {
+				header := make([]string, len(row))
+				for i, d := range row {
+					header[i] = d.(string)
+				}
+				return header, nil
+			}
+		}
+	}
+	return nil, errors.New("empty sheet")
+}
+
 /*
  * TODO:
  */
 func _readSheet(id string, srv *sheets.Service, spreadsheetId string, nameIdx int, valueIdxs []int) ([]string, map[string][]string) {
-	readRange := id + "!A1:ZZ" //TODO: READ FIRST LINE AS NAMES
+	readRange := id + "!A1:ZZZ" //TODO: READ FIRST LINE AS NAMES
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet. %v", err)
@@ -171,6 +224,37 @@ type IndexEntry struct {
 	Nc     int
 	Vc     []int
 }
+
+type NamedIndexEntry struct {
+	Genome string
+	Id     string
+	Type   string
+	Nid    string
+	Vids   []string
+}
+
+func readNamedIndex(srv *sheets.Service, spreadsheetId string) []NamedIndexEntry {
+	id := "Index"
+	readRange := id + "!A2:E"
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve data from sheet. %v", err)
+	}
+	a := make([]NamedIndexEntry, len(resp.Values))
+	if len(resp.Values) > 0 {
+		for i, row := range resp.Values {
+			ns := row[3].(string)
+			vs := strings.Split(row[4].(string), ",")
+			a[i] = NamedIndexEntry{row[0].(string), row[1].(string), row[2].(string), ns, vs}
+		}
+	} else {
+		fmt.Print("No data found.")
+		return nil
+	}
+	return a
+}
+
+/* TODO THIS Add string []string inferface */
 
 func readIndex(srv *sheets.Service, spreadsheetId string) []IndexEntry {
 	id := "Index"

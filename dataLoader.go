@@ -210,6 +210,7 @@ func _tabixLoader(dbname string, data interface{}) (DataRouter, error) {
 	}
 }
 
+/*
 func _bigbedLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
@@ -225,7 +226,7 @@ func _bigbedLoader(dbname string, data interface{}) (DataRouter, error) {
 		return a, nil
 	}
 }
-
+*/
 func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
@@ -242,48 +243,6 @@ func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
 	}
 }
 
-/* remove image server support
-
-func _imageLoader(dbname string, data interface{}) (DataRouter, error) {
-	switch v := data.(type) {
-	default:
-		fmt.Printf("unexpected type %T", v)
-		return nil, errors.New(fmt.Sprintf("image format not support type %T", v))
-	case string:
-		return NewTabixImageManager(data.(string), dbname), nil //TODO MODIFICATION
-	}
-}
-
-func _imgLoader(dbname string, data interface{}) (DataRouter, error) {
-	switch v := data.(type) {
-	default:
-		fmt.Printf("unexpected type %T \n", v)
-		return nil, errors.New(fmt.Sprintf("img format not support type %T", v))
-	case map[string]interface{}:
-		r := InitBinindexImageRouter(dbname)
-		r.Load(_parseToBedImage(data.(map[string]interface{})))
-		return r, nil
-		//return NewTabixImageManager(data.(string), dbname), nil //
-	}
-}
-
-func _parseToBedImage(d map[string]interface{}) []bedImage {
-	r := make([]bedImage, len(d))
-	i := 0
-	for k, v := range d {
-		v0 := v.(map[string]interface{})
-		location, _ := v0["Location"]
-		position, _ := v0["Position"]
-		r[i] = bedImage{
-			k,
-			location.(string),
-			parseRegions(position.(string)),
-		}
-		i++
-	}
-	return r
-}
-*/
 func parseRegions(txt string) []Bed4 {
 	l := strings.Split(txt, ";")
 	b := make([]Bed4, len(l))

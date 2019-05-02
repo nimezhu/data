@@ -14,6 +14,12 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
+func logErr(err error) {
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func parseXls(uri string) ([]dataIndex, error) {
 	di := []dataIndex{}
 	httpP, _ := regexp.Compile("^http://")
