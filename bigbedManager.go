@@ -236,7 +236,7 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 }
 
 func NewBigBedManager(uri string, dbname string, root string) *BigBedManager {
-	uriMap := LoadURI(uri)
+	uriMap := loadURI(uri)
 	dataMap := make(map[string]*bbi.BigBedReader)
 	valueMap := make(map[string]map[string]interface{})
 	//dataList := []string{}

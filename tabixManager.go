@@ -85,7 +85,7 @@ func (m *TabixManager) List() []string {
 func (T *TabixManager) ServeTo(router *mux.Router) {
 	prefix := "/" + T.dbname
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		keys := []string{}
 		for key, _ := range T.uriMap {
 			keys = append(keys, key)
@@ -94,12 +94,12 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		jsonHic, _ := json.Marshal(T.uriMap)
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		params := mux.Vars(r)
 		id := params["id"]
 		if _, ok := T.dataMap[id]; ok {
@@ -111,7 +111,7 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 		}
 	})
 	router.HandleFunc(prefix+"/{id}/get/{chr}:{start}-{end}", func(w http.ResponseWriter, r *http.Request) {
-		
+
 		params := mux.Vars(r)
 		id := params["id"]
 		chrom := params["chr"]
@@ -133,7 +133,7 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 }
 
 func NewTabixManager(uri string, dbname string) *TabixManager {
-	uriMap := LoadURI(uri)
+	uriMap := loadURI(uri)
 	dataMap := make(map[string]*bix.Bix)
 	//dataList := []string{}
 	for k, v := range uriMap {

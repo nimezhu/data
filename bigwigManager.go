@@ -164,7 +164,7 @@ func (m *BigWigManager) ServeTo(router *mux.Router) {
 
 func NewBigWigManager(uri string, dbname string, indexRoot string) *BigWigManager {
 	//prefix := "/" + dbname
-	uriMap := LoadURI(uri)
+	uriMap := loadURI(uri)
 	bwmap := make(map[string]*bbi.BigWigReader)
 	valueMap := make(map[string]map[string]interface{})
 	for k, v := range uriMap {

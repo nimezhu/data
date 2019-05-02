@@ -32,7 +32,7 @@ type TrackManager struct {
 
 func NewTrackManager(uri string, dbname string, root string) *TrackManager {
 	m := InitTrackManager(dbname, root)
-	uriMap := LoadURI(uri)
+	uriMap := loadURI(uri)
 	for k, v := range uriMap {
 		m.AddURI(v, k)
 	}

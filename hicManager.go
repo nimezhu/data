@@ -87,7 +87,7 @@ func (m *HicManager) ServeTo(router *mux.Router) {
 }
 
 func NewHicManager(uri string, dbname string) *HicManager {
-	uriMap := LoadURI(uri)
+	uriMap := loadURI(uri)
 	dataMap := make(map[string]*hic.HiC)
 	valueMap := make(map[string]map[string]interface{})
 	dataList := []string{}
