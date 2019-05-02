@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/indexed"
@@ -25,53 +26,69 @@ type TrackManager struct {
 	id        string
 	uriMap    map[string]string
 	formatMap map[string]string
-	managers  map[string]Manager
+	managers  map[string]Manager2
+	root      string
 }
 
-func NewTrackManager(uri string, dbname string) *TrackManager {
-	m := InitTrackManager(dbname)
+func NewTrackManager(uri string, dbname string, root string) *TrackManager {
+	m := InitTrackManager(dbname, root)
 	uriMap := LoadURI(uri)
 	for k, v := range uriMap {
 		m.AddURI(v, k)
 	}
 	return m
 }
-func InitTrackManager(dbname string) *TrackManager {
+func InitTrackManager(dbname string, root string) *TrackManager {
 	uriMap := make(map[string]string)
 	formatMap := make(map[string]string)
-	dataMap := make(map[string]Manager)
+	dataMap := make(map[string]Manager2)
 	m := TrackManager{
 		dbname,
 		uriMap,
 		formatMap,
 		dataMap,
+		root,
 	}
 	return &m
 }
-func newManager(prefix string, format string) Manager {
+func _newManager2(prefix string, format string, root string) Manager2 {
 	if format == "bigwig" {
-		return InitBigWigManager(prefix + ".bigwig")
+		return InitBigWigManager2(prefix+".bigwig", root)
 	}
 	if format == "bigbed" {
-		return InitBigBedManager(prefix + ".bigbed")
+		return InitBigBedManager2(prefix+".bigbed", root)
 	}
 	if format == "bigbedLarge" {
-		return InitBigBedManager(prefix + ".bigbedLarge")
+		return InitBigBedManager2(prefix+".bigbedLarge", root)
 	}
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
 	}
-	//if format == "image" {
-	//	return InitTabixImageManager(prefix + ".image")
-	//}
+	/* obsoleted
+	if format == "image" {
+		return InitTabixImageManager(prefix + ".image")
+	}
+	*/
 	return nil
+}
+func (m *TrackManager) SetAttr(key string, values map[string]interface{}) error {
+	if v, ok := m.managers[m.formatMap[key]]; ok {
+		return v.SetAttr(key, values)
+	}
+	return errors.New("not found manager")
+}
+func (m *TrackManager) GetAttr(key string) (map[string]interface{}, bool) {
+	if _, ok := m.formatMap[key]; !ok {
+		return nil, false
+	}
+	return m.managers[m.formatMap[key]].GetAttr(key)
 }
 func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	format, _ := indexed.MagicReadSeeker(reader)
 	if format == "hic" || format == "bigwig" || format == "bigbed" {
 		reader.Seek(0, 0)
 		if _, ok := m.managers[format]; !ok {
-			m.managers[format] = newManager(m.id, format)
+			m.managers[format] = _newManager2(m.id, format, m.root)
 		}
 		m.managers[format].Add(key, reader, uri)
 		m.formatMap[key] = format
@@ -81,17 +98,13 @@ func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 }
 func (m *TrackManager) AddURI(uri string, key string) error {
 	format, _ := indexed.Magic(uri)
-	m.formatMap[key] = format
-	m.uriMap[key] = uri
 	//HANDLE binindex in mem
-	/*
-		if format == "binindex" {
-			m.uriMap[key] = strings.Replace(uri, "_format_:binindex:", "", 1)
-			return nil
-		}
-	*/
+	if format == "binindex" {
+		m.uriMap[key] = strings.Replace(uri, "_format_:binindex:", "", 1)
+		return nil
+	}
 	if _, ok := m.managers[format]; !ok {
-		if _m := newManager(m.id, format); _m != nil {
+		if _m := _newManager2(m.id, format, m.root); _m != nil {
 			m.managers[format] = _m
 			m.managers[format].AddURI(uri, key)
 		} else {
@@ -100,6 +113,8 @@ func (m *TrackManager) AddURI(uri string, key string) error {
 	} else {
 		m.managers[format].AddURI(uri, key)
 	}
+	m.formatMap[key] = format
+	m.uriMap[key] = uri
 	return nil
 }
 
@@ -114,49 +129,59 @@ func (m *TrackManager) Del(k string) error {
 }
 
 func (m *TrackManager) ServeTo(router *mux.Router) {
-	prefix := "/" + m.id
-	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+	for _, v := range m.managers {
+		v.ServeTo(router)
+	}
 
-		jsonHic, _ := json.Marshal(m.uriMap)
-		w.Write(jsonHic)
+	prefix := "/" + m.id
+	sub := router.PathPrefix(prefix).Subrouter()
+	sub.HandleFunc("/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
+
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(m.uriMap)
+			w.Write(jsonHic)
+		} else {
+			//TODO PRECOMPUTING ??
+			retv := make(map[string]map[string]interface{})
+			for _, m0 := range m.managers {
+				for _, k := range m0.List() {
+					retv[k], _ = m0.GetAttr(k)
+				}
+			}
+			jsonAttr, _ := json.Marshal(retv)
+			w.Write(jsonAttr)
+
+		}
 	})
-	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
+	sub.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 
 		a := make([]map[string]string, 0)
+		//TODO fix this for trackAgent
+		attr, ok := r.URL.Query()["attr"]
+		sign := true
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			sign = false
+		}
+
 		for k, _ := range m.uriMap {
 			a = append(a, map[string]string{"id": k, "format": m.formatMap[k]})
+			if sign {
+				if attrs, ok := m.managers[m.formatMap[k]].GetAttr(k); ok {
+					for k0, v0 := range attrs {
+						switch v0.(type) {
+						case string:
+							a[len(a)-1][k0] = v0.(string)
+						default:
+
+						}
+					}
+				}
+			}
 		}
 		jsonHic, _ := json.Marshal(a)
 		w.Write(jsonHic)
 	})
-	router.HandleFunc(prefix+"/{id}/{cmd:.*}", func(w http.ResponseWriter, r *http.Request) {
-		params := mux.Vars(r)
-		cmd := params["cmd"]
-		id := params["id"]
-		format, _ := m.formatMap[id]
-		//w.Write([]byte(code))
-		//TODO redirect with format
-		/*
-			if format == "binindex" { //binindex in memory
-				uri, _ := m.uriMap[id] //name
-				a1 := strings.Replace(r.URL.String(), prefix+"/", "", 1)
-				a2 := strings.Replace(a1, id, uri, 1)
-				//url := "/" + uri + "/" + cmd
-				//fmt.Println(a2)
-				//fmt.Println(url)
-				url := "/" + a2
-
-				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-			} else {
-		*/
-		url := prefix + "." + format + "/" + id + "/" + cmd
-
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		//}
-	})
-	for _, v := range m.managers {
-		v.ServeTo(router)
-	}
 }
 
 func (m *TrackManager) List() []string {

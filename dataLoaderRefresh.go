@@ -13,7 +13,7 @@ func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 	if r, ok := e.Data[dbname]; ok {
 		log.Println("refresh ", dbname)
 		newdata := data.(map[string]interface{})
-		newr := r.(*TrackManager2)
+		newr := r.(*TrackManager)
 		/* Delete OLD inteface could be string or map[string]interface */
 		for _, k := range newr.List() {
 			if _, ok := newdata[k]; !ok {

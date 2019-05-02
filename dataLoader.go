@@ -105,9 +105,9 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 				fmt.Printf("unexpected type %T", v)
 				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 			case string:
-				return NewTrackManager2(data.(string), dbname, e.IndexRoot), nil
+				return NewTrackManager(data.(string), dbname, e.IndexRoot), nil
 			case map[string]interface{}:
-				a := InitTrackManager2(dbname, e.IndexRoot)
+				a := InitTrackManager(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
 					switch val.(type) {
 					case string:
@@ -226,7 +226,6 @@ func _bigbedLoader(dbname string, data interface{}) (DataRouter, error) {
 		return a, nil
 	}
 }
-*/
 func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
@@ -242,6 +241,7 @@ func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
 		return a, nil
 	}
 }
+*/
 
 func parseRegions(txt string) []Bed4 {
 	l := strings.Split(txt, ";")

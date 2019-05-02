@@ -84,7 +84,7 @@ func client_secretJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "client_secret.json", size: 434, mode: os.FileMode(420), modTime: time.Unix(1510694315, 0)}
+	info := bindataFileInfo{name: "client_secret.json", size: 434, mode: os.FileMode(420), modTime: time.Unix(1556817493, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
