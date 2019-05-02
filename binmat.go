@@ -10,13 +10,13 @@ import (
 	. "github.com/nimezhu/netio"
 )
 
-func Float64frombytes(bytes []byte) float64 {
+func float64frombytes(bytes []byte) float64 {
 	bits := binary.LittleEndian.Uint64(bytes)
 	float := math.Float64frombits(bits)
 	return float
 }
 
-func Float64bytes(float float64) []byte {
+func float64bytes(float float64) []byte {
 	bits := math.Float64bits(float)
 	bytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bytes, bits)
@@ -37,7 +37,7 @@ func matrixToBytes(m mat64.Matrix) []byte {
 		for j := 0; j < c; j++ {
 			f := m.At(i, j)
 			//fmt.Println(i, j, f)
-			s.Write(Float64bytes(f))
+			s.Write(float64bytes(f))
 		}
 	}
 	return s.Bytes()
@@ -57,5 +57,4 @@ func bytesToMatrix(b []byte) mat64.Matrix { //todo
 	matrix := mat64.NewDense(r, c, mat)
 	fmt.Println(sprintMat64(matrix))
 	return matrix
-	//fmt.Println(row, col)
 }
