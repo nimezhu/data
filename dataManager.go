@@ -59,47 +59,8 @@ func IterEntry(d DataManager) chan Entry {
 	return ch
 }
 
-/*
-func newDataManager(dbname string, uri string, format string) DataManager {
-	switch format {
-	case "file":
-		return NewFileManager(uri, dbname)
-	case "bigwig":
-		return NewBigWigManager(uri, dbname)
-	case "hic":
-		return NewHicManager(uri, dbname)
-	case "map":
-		return NewMapManager(uri, dbname)
-	case "tabix":
-		return NewTabixManager(uri, dbname)
-	case "bigbed":
-		return NewBigBedManager2(uri, dbname)
-	case "track":
-		return NewTrackManager(uri, dbname)
-		//case "image":
-		//	return NewTabixImageManager(uri, dbname)
-	}
-	return nil
-}
-
-func initDataManager(dbname string, format string) DataManager {
-	switch format {
-	case "file":
-		return InitFileManager(dbname)
-	case "bigwig":
-		return InitBigWigManager(dbname)
-	case "hic":
-		return InitHicManager(dbname)
-	case "map":
-		return InitMapManager(dbname)
-	case "track":
-		return InitTrackManager(dbname)
-	}
-	return nil
-}
-
 /* LoadCloud
-*/
+ */
 func LoadCloud(uri string, id string, router *mux.Router) (Manager, error) { //trackmanager in minio
 	f, err := netio.Open(uri)
 	if err != nil {
