@@ -83,7 +83,7 @@ func (m *HicManager) ServeTo(router *mux.Router) {
 			w.Write(jsonAttr)
 		}
 	})
-	AddHicsHandle(sub, m.dataMap)
+	addHicsHandle(sub, m.dataMap)
 }
 
 func NewHicManager(uri string, dbname string) *HicManager {

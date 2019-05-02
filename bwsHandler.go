@@ -12,7 +12,7 @@ import (
 	. "github.com/nimezhu/indexed/bbi"
 )
 
-func AddBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader) {
+func addBwsHandle(router *mux.Router, bwMap map[string]*BigWigReader) {
 	router.HandleFunc("/{id}/get/{chr}:{start}-{end}/{width}", func(w http.ResponseWriter, r *http.Request) {
 
 		params := mux.Vars(r)

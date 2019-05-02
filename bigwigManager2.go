@@ -159,7 +159,7 @@ func (m *BigWigManager2) ServeTo(router *mux.Router) {
 		//not only uriMap ... but also attrs.
 
 	})
-	AddBwsHandle(sub, m.bwMap)
+	addBwsHandle(sub, m.bwMap)
 }
 
 func NewBigWigManager2(uri string, dbname string, indexRoot string) *BigWigManager2 {

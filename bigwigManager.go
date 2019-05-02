@@ -80,7 +80,7 @@ func (m *BigWigManager) ServeTo(router *mux.Router) {
 		jsonHic, _ := json.Marshal(m.uriMap)
 		w.Write(jsonHic)
 	})
-	AddBwsHandle(sub, m.bwMap)
+	addBwsHandle(sub, m.bwMap)
 }
 
 func NewBigWigManager(uri string, dbname string) *BigWigManager {
