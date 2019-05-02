@@ -26,7 +26,7 @@ type TrackManager struct {
 	id        string
 	uriMap    map[string]string
 	formatMap map[string]string
-	managers  map[string]Manager2
+	managers  map[string]Manager
 	root      string
 }
 
@@ -41,7 +41,7 @@ func NewTrackManager(uri string, dbname string, root string) *TrackManager {
 func InitTrackManager(dbname string, root string) *TrackManager {
 	uriMap := make(map[string]string)
 	formatMap := make(map[string]string)
-	dataMap := make(map[string]Manager2)
+	dataMap := make(map[string]Manager)
 	m := TrackManager{
 		dbname,
 		uriMap,
@@ -51,15 +51,15 @@ func InitTrackManager(dbname string, root string) *TrackManager {
 	}
 	return &m
 }
-func _newManager2(prefix string, format string, root string) Manager2 {
+func _newManager(prefix string, format string, root string) Manager {
 	if format == "bigwig" {
-		return InitBigWigManager2(prefix+".bigwig", root)
+		return InitBigWigManager(prefix+".bigwig", root)
 	}
 	if format == "bigbed" {
-		return InitBigBedManager2(prefix+".bigbed", root)
+		return InitBigBedManager(prefix+".bigbed", root)
 	}
 	if format == "bigbedLarge" {
-		return InitBigBedManager2(prefix+".bigbedLarge", root)
+		return InitBigBedManager(prefix+".bigbedLarge", root)
 	}
 	if format == "hic" {
 		return InitHicManager(prefix + ".hic")
@@ -88,7 +88,7 @@ func (m *TrackManager) Add(key string, reader io.ReadSeeker, uri string) error {
 	if format == "hic" || format == "bigwig" || format == "bigbed" {
 		reader.Seek(0, 0)
 		if _, ok := m.managers[format]; !ok {
-			m.managers[format] = _newManager2(m.id, format, m.root)
+			m.managers[format] = _newManager(m.id, format, m.root)
 		}
 		m.managers[format].Add(key, reader, uri)
 		m.formatMap[key] = format
@@ -104,7 +104,7 @@ func (m *TrackManager) AddURI(uri string, key string) error {
 		return nil
 	}
 	if _, ok := m.managers[format]; !ok {
-		if _m := _newManager2(m.id, format, m.root); _m != nil {
+		if _m := _newManager(m.id, format, m.root); _m != nil {
 			m.managers[format] = _m
 			m.managers[format].AddURI(uri, key)
 		} else {

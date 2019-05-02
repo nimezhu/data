@@ -54,9 +54,9 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 				fmt.Printf("unexpected type %T", v)
 				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 			case string:
-				return NewBigWigManager2(data.(string), dbname, e.IndexRoot), nil
+				return NewBigWigManager(data.(string), dbname, e.IndexRoot), nil
 			case map[string]interface{}:
-				a := InitBigWigManager2(dbname, e.IndexRoot)
+				a := InitBigWigManager(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
 					switch val.(type) {
 					case string:
@@ -79,9 +79,9 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 				fmt.Printf("unexpected type %T", v)
 				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 			case string:
-				return NewBigBedManager2(data.(string), dbname, e.IndexRoot), nil
+				return NewBigBedManager(data.(string), dbname, e.IndexRoot), nil
 			case map[string]interface{}:
-				a := InitBigBedManager2(dbname, e.IndexRoot)
+				a := InitBigBedManager(dbname, e.IndexRoot)
 				for key, val := range data.(map[string]interface{}) {
 					switch val.(type) {
 					case string:
@@ -145,6 +145,7 @@ func _fileLoader(dbname string, data interface{}) (DataRouter, error) {
 	}
 }
 
+/*
 func _bigwigLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
@@ -160,6 +161,7 @@ func _bigwigLoader(dbname string, data interface{}) (DataRouter, error) {
 		return a, nil
 	}
 }
+*/
 
 func _hicLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
@@ -209,39 +211,6 @@ func _tabixLoader(dbname string, data interface{}) (DataRouter, error) {
 		return NewTabixManager(data.(string), dbname), nil
 	}
 }
-
-/*
-func _bigbedLoader(dbname string, data interface{}) (DataRouter, error) {
-	switch v := data.(type) {
-	default:
-		fmt.Printf("unexpected type %T", v)
-		return nil, errors.New(fmt.Sprintf("bigbed format not support type %T", v))
-	case string:
-		return NewBigBedManager(data.(string), dbname), nil
-	case map[string]interface{}:
-		a := InitBigBedManager(dbname)
-		for key, val := range data.(map[string]interface{}) {
-			a.AddURI(val.(string), key)
-		}
-		return a, nil
-	}
-}
-func _trackLoader(dbname string, data interface{}) (DataRouter, error) {
-	switch v := data.(type) {
-	default:
-		fmt.Printf("unexpected type %T", v)
-		return nil, errors.New(fmt.Sprintf("track format not support type %T", v))
-	case string:
-		return NewTrackManager(data.(string), dbname), nil
-	case map[string]interface{}:
-		a := InitTrackManager(dbname)
-		for key, val := range data.(map[string]interface{}) {
-			a.AddURI(val.(string), key)
-		}
-		return a, nil
-	}
-}
-*/
 
 func parseRegions(txt string) []Bed4 {
 	l := strings.Split(txt, ";")

@@ -82,3 +82,13 @@ func saveIdx(uri string, root string) (int, error) {
 	}
 	return mode, nil
 }
+
+func readBw(uri string) *bbi.BigWigReader {
+	reader, err := netio.NewReadSeeker(uri)
+	checkErr(err)
+	bwf := bbi.NewBbiReader(reader)
+	bwf.InitIndex()
+	//log.Println("in reading idx of", uri)
+	bw := bbi.NewBigWigReader(bwf)
+	return bw
+}
