@@ -30,7 +30,9 @@ func checkUri(uri string, root string) (string, int) {
 			dir = strings.Replace(uri, "https://", "", 1)
 		}
 		dir += ".index"
-		fn := path.Join(root, dir)
+		p := strings.Split(dir, "/")
+		ps := append([]string{root}, p...)
+		fn := path.Join(ps...)
 		if _, err := os.Stat(fn); os.IsNotExist(err) {
 			return fn, 1
 		} else {
