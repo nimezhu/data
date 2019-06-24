@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
+	path "path/filepath"
 	"regexp"
 
 	"github.com/gorilla/mux"

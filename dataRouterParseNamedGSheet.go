@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
-	"path"
+	path "path/filepath"
 	"regexp"
 
 	"golang.org/x/oauth2/google"

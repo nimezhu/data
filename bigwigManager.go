@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
+	path "path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/nimezhu/indexed/bbi"

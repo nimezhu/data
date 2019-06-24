@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
+	path "path/filepath"
 	"strconv"
 
 	"github.com/gorilla/mux"

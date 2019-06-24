@@ -3,7 +3,7 @@ package data
 import (
 	"log"
 	"os"
-	"path"
+	path "path/filepath"
 	"regexp"
 	"strings"
 
