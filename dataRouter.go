@@ -281,6 +281,14 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	return nil
 }
 
+func (m *Loader) LoadWorkbook(wb *SimpleWorkbook, router *mux.Router) error {
+	indexes, err := ParseSimpleWb(wb)
+	if err != nil {
+		return err
+	}
+	return m.loadIndexesTo(indexes, router)
+}
+
 /*
 func LoadIndexTo(index dataIndex, router *mux.Router) error {
 	return loadIndex(index, router)
