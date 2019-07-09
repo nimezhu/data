@@ -7,6 +7,7 @@ import (
 	path "path/filepath"
 	"regexp"
 
+	"github.com/nimezhu/asheets"
 	"golang.org/x/oauth2/google"
 	sheets "google.golang.org/api/sheets/v4"
 )
@@ -31,8 +32,8 @@ func parseNamedGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 	//TODO Get Client Agent.
-	gA := gAgent{dir}
-	client := gA.getClient(ctx, config)
+	gA := asheets.NewGAgent(dir)
+	client := gA.GetClient(ctx, config)
 
 	srv, err := sheets.New(client)
 	if err != nil {
