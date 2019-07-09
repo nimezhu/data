@@ -45,13 +45,12 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 	if f, ok := loaders[format]; ok {
 		return f
 	}
-	//TODO e.IndexRoot
 	switch format {
 	case "bigwig": //bigwig with buffer
 		return func(dbname string, data interface{}) (DataRouter, error) {
 			switch v := data.(type) {
 			default:
-				fmt.Printf("unexpected type %T", v)
+				log.Printf("unexpected type %T\n", v)
 				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 			case string:
 				return NewBigWigManager(data.(string), dbname, e.IndexRoot), nil
@@ -102,7 +101,7 @@ func (e *Loader) Factory(dbname string, data interface{}, format string) func(st
 		return func(dbname string, data interface{}) (DataRouter, error) {
 			switch v := data.(type) {
 			default:
-				fmt.Printf("unexpected type %T", v)
+				log.Printf("unexpected type %T\n", v)
 				return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
 			case string:
 				return NewTrackManager(data.(string), dbname, e.IndexRoot), nil
@@ -145,28 +144,10 @@ func _fileLoader(dbname string, data interface{}) (DataRouter, error) {
 	}
 }
 
-/*
-func _bigwigLoader(dbname string, data interface{}) (DataRouter, error) {
-	switch v := data.(type) {
-	default:
-		fmt.Printf("unexpected type %T", v)
-		return nil, errors.New(fmt.Sprintf("bigwig format not support type %T", v))
-	case string:
-		return NewBigWigManager(data.(string), dbname), nil
-	case map[string]interface{}:
-		a := InitBigWigManager(dbname)
-		for key, val := range data.(map[string]interface{}) {
-			a.AddURI(val.(string), key)
-		}
-		return a, nil
-	}
-}
-*/
-
 func _hicLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
-		fmt.Printf("unexpected type %T", v)
+		log.Printf("unexpected type %T\n", v)
 		return nil, errors.New(fmt.Sprintf("hic format not support type %T", v))
 	case string:
 		return NewHicManager(data.(string), dbname), nil
@@ -190,7 +171,7 @@ func _hicLoader(dbname string, data interface{}) (DataRouter, error) {
 func _mapLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
-		fmt.Printf("unexpected type %T", v)
+		log.Printf("unexpected type %T\n", v)
 		return nil, errors.New(fmt.Sprintf("map format not support type %T", v))
 	case string:
 		return NewMapManager(data.(string), dbname), nil
@@ -205,7 +186,7 @@ func _mapLoader(dbname string, data interface{}) (DataRouter, error) {
 func _tabixLoader(dbname string, data interface{}) (DataRouter, error) {
 	switch v := data.(type) {
 	default:
-		fmt.Printf("unexpected type %T", v)
+		log.Printf("unexpected type %T\n", v)
 		return nil, errors.New(fmt.Sprintf("tabix format not support type %T", v))
 	case string:
 		return NewTabixManager(data.(string), dbname), nil

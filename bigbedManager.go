@@ -49,7 +49,7 @@ func (m *BigBedManager) readBw(uri string) (*bbi.BigBedReader, error) {
 	checkErr(err)
 	bwf := bbi.NewBbiReader(reader)
 	fn, mode := checkUri(uri, m.indexRoot)
-	log.Println("load", uri, mode)
+	//log.Println("  Load entry", uri, mode)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {
@@ -90,6 +90,7 @@ func (m *BigBedManager) Add(key string, reader io.ReadSeeker, uri string) error 
 	m.uriMap[key] = uri
 	bwf := bbi.NewBbiReader(reader)
 	fn, mode := checkUri(uri, m.indexRoot)
+	log.Println("    Loading entry", key)
 	if mode == 0 {
 		bwf.InitIndex()
 	} else if mode == 1 {
@@ -118,6 +119,7 @@ func (m *BigBedManager) Add(key string, reader io.ReadSeeker, uri string) error 
 func (bb *BigBedManager) AddURI(uri string, key string) error {
 	bb.uriMap[key] = uri
 	var err error
+	log.Println("    Loading entry", key)
 	bb.dataMap[key], err = bb.readBw(uri)
 	return err
 }

@@ -12,8 +12,6 @@ import (
 	sheets "google.golang.org/api/sheets/v4"
 )
 
-//TODO: dataIndex data mv to map[string]interface{}
-//      based on header
 func objectFactory(keys []string, values []string) map[string]interface{} {
 	if len(keys) != len(values) {
 		return nil
@@ -34,12 +32,9 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	ctx := context.Background()
 
 	b, err := Asset("client_secret.json")
-	//TODO any json which allow access gsheet.
-	//b, err := ioutil.ReadFile(clientSecretJson)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
-
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
@@ -63,12 +58,9 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		if k[0] == '#' {
 			continue
 		}
-		//TODO add Interface For Complicated Data Input multi Columns.
 		var s map[string]interface{}
 		var h []string
-		//JUDGE VCs as Name or ColName
 		h, s = readSheet(k, srv, spreadsheetId, e.Nc, e.Vc) //header TODO
-		log.Println("TODO Handle Header", h)
 		format := v
 		data := make(map[string]interface{})
 		if len(e.Vc) == 1 {
@@ -79,7 +71,6 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 			} else { //for file
 				for id, loc := range s {
 					var uri string
-					// Add MORE TOLERATE GUESS URI INDEX FROM HEADER add support _format_:[format]:[uri]
 					if httpP.MatchString(loc.(string)) || httpsP.MatchString(loc.(string)) || myFormatP.MatchString(loc.(string)) {
 						uri = loc.(string)
 						data[id] = uri
@@ -97,19 +88,13 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 		} else { //Vc columns > 1
 			for id, vals := range s {
 				var uri string
-				//TODO
-				// Add MORE TOLERATE GUESS URI INDEX FROM HEADER add support _format_:[format]:[uri]
 				loc := vals.([]string)[0]
 				if httpP.MatchString(loc) || httpsP.MatchString(loc) || myFormatP.MatchString(loc) {
 					data[id] = objectFactory(h, vals.([]string))
 				} else {
 					uri = path.Join(root.(string), loc) //TODO
 					if _, err := os.Stat(uri); err == nil {
-						//TODO Add MORE TOLERATE GUESS URI INDEX FROM HEADER
 						vals.([]string)[0] = uri
-						//data[id] = vals //TODO Add Vals Mapping to value Map handle h here
-						//map[string]
-						//convert vals to map[string]interface{}
 						data[id] = objectFactory(h, vals.([]string))
 					} else {
 						log.Println("WARNING!!! cannot reading", uri, id)

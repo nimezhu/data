@@ -28,6 +28,7 @@ func (m *HicManager) GetAttr(key string) (map[string]interface{}, bool) {
 	return v, ok
 }
 func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
+	log.Println("    Loading entry ", key)
 	vhic, err := hic.DataReader(reader)
 	if err != nil {
 		return err
@@ -39,7 +40,7 @@ func (m *HicManager) Add(key string, reader io.ReadSeeker, uri string) error {
 func (m *HicManager) AddURI(uri string, key string) error {
 	m.uriMap[key] = uri
 	m.dataMap[key] = readhic(uri)
-	log.Println("add uri", uri, key)
+	log.Println("    Loading entry ", key)
 	return nil
 }
 func (m *HicManager) Del(key string) error {

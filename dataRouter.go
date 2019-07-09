@@ -14,11 +14,6 @@ import (
 	"github.com/nimezhu/indexed"
 )
 
-//TODO Load Indexes From gsheet and xls
-//TODO DATAURI SYSTEM
-//TODO SERVER / GENOME(VERSION) / NAME
-//TODO LS Parameters Get Specific Attrs Such as longLabels
-//TODO Parse Descriptions
 type dataIndex struct {
 	genome string      `json:"genome"`
 	dbname string      `json:"dbname"`
@@ -86,12 +81,11 @@ func SaveIndex(uri string, root string) error {
 	if err != nil {
 		return err
 	}
-	//bw := InitBigWigManager2("noname", root)
 	for _, v := range d {
 		if v.format == "bigwig" || v.format == "bigbed" || v.format == "track" {
 			switch t := v.data.(type) {
 			default:
-				fmt.Printf("unexpected type %T", t)
+				log.Printf("unexpected type %T\n", t)
 				return errors.New(fmt.Sprintf("bigwig format not support type %T", t))
 			case string:
 				return errors.New("Not support text input yet")
@@ -193,7 +187,7 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 	}
 	//gdb := map[string][]map[string]string{}
 	for g, v := range gs {
-		log.Println("Loading Genome Data ", g)
+		log.Println("Loading Genome ", g)
 		m.gdb[g] = []map[string]string{}
 		for _, v0 := range v {
 			err := m.loadIndex(v0, router)
@@ -251,31 +245,12 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			w.Write([]byte("[]"))
 		}
 	})
-	/*
-		for k, v := range gs {
-			go func(k string, v []dataIndex) {
-				router.HandleFunc("/"+k+"/list", func(w http.ResponseWriter, r *http.Request) {
-					u := []string{}
-					for _, v0 := range v {
-						u = append(u, v0.dbname)
-					}
-					e, _ := json.Marshal(u)
-
-					w.Write(e)
-				})
-			}(k, v)
-			go func(k string, e []map[string]string) {
-				router.HandleFunc("/"+k+"/ls", func(w http.ResponseWriter, r *http.Request) {
-					e, _ := json.Marshal(e)
-
-					w.Write(e)
-				})
-			}(k, m.gdb[k])
-		}
-	*/
-	//add json and list to router
 	if fail > 0 {
-		return errors.New(fmt.Sprintf("Fail loading %d / %d database", fail, len(indexes)))
+		s := fmt.Sprintf("Fail loading %d / %d sheets", fail, len(indexes))
+		log.Println(s)
+		return errors.New(s)
+	} else {
+		log.Println(fmt.Sprintf("Successful loaded %d sheets", len(indexes)))
 	}
 
 	return nil
@@ -298,23 +273,22 @@ func LoadIndexTo(index dataIndex, router *mux.Router) error {
 /* serve: Add DataRouter to Router
  */
 func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
-	//TODO: add genome version
 	var err error
 	if index.genome != "all" {
+		log.Println("  Loading sheet", index.dbname) //TODO double name
 		r, err := m.loadData(index.genome+"/"+index.dbname, index.data, index.format)
 		//TODO not really need to load uri
 		if err == nil {
-			log.Println("Loading to server", index.genome, index.dbname) //TODO double name
-			m.Data[index.genome+"/"+index.dbname] = r                    //TODO double name
+			m.Data[index.genome+"/"+index.dbname] = r //TODO double name
 			r.ServeTo(router)
 		} else {
 			log.Println(err)
 		}
 	} else {
+		log.Println("  Loadng sheet", index.dbname) //TODO double name
 		r, err := m.loadData(index.dbname, index.data, index.format)
 		if err == nil {
-			log.Println("Loading to server", index.genome, index.dbname) //TODO double name
-			m.Data[index.dbname] = r                                     //TODO double name
+			m.Data[index.dbname] = r //TODO double name
 			r.ServeTo(router)
 		} else {
 			log.Println(err)
