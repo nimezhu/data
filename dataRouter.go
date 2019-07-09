@@ -41,9 +41,6 @@ func (m *Loader) Reload(uri string) error {
 	return m.refreshIndexURI(uri)
 }
 
-/* LoadIndexURI is a replace for Load
- *  it is more flexible for complex struture data
- */
 func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 	d, err := m.smartParseURI(uri)
 	if err != nil {
@@ -53,9 +50,6 @@ func (m *Loader) loadIndexURI(uri string, router *mux.Router) error {
 	return err
 }
 
-/* LoadIndexURI is a replace for Load
- *  it is more flexible for complex struture data
- */
 func (m *Loader) refreshIndexURI(uri string) error {
 	d, err := m.smartParseURI(uri)
 	if err != nil {
@@ -69,10 +63,6 @@ func (m *Loader) refreshIndexURI(uri string) error {
 	return err
 }
 
-/* uri could be google sheets id
- * or uri
- * or .xls file
- */
 func SaveIndex(uri string, root string) error {
 	h1, _ := regexp.Compile("^http://")
 	h2, _ := regexp.Compile("^https://")
@@ -96,7 +86,7 @@ func SaveIndex(uri string, root string) error {
 					}
 					format, _ := indexed.Magic(val.(string))
 					if format == "bigwig" || format == "bigbed" {
-						log.Println("process " + val.(string))
+						log.Println("    Save index of ", val.(string))
 						saveIdx(val.(string), root)
 					}
 				}
@@ -106,9 +96,6 @@ func SaveIndex(uri string, root string) error {
 	return nil
 }
 
-//Test Formats
-//V1
-//V2 : Auto Detect Headers TODO !!!!!!
 func smartCheckSheetHeader(uri string) {
 
 }
@@ -136,10 +123,6 @@ func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 	return nil, errors.New("not recognize uri")
 }
 
-/* For API , please using LoadIndexURI
- * TODO: uri change to attrs
- *       or add attrs in string
- */
 func trans(v dataIndex) map[string]string {
 	switch v.data.(type) {
 	case string:
@@ -160,14 +143,8 @@ func trans(v dataIndex) map[string]string {
 	return nil
 }
 
-//TODO ADD Refresh Indexes
 func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
-	//add genome versions .
 	fail := 0
-	//todo entry data and genomes in loader.
-	//event driven to reload entry and jdata?
-	//entry := []string{}
-	//jdata := []map[string]string{}
 	gs := map[string][]dataIndex{}
 	for _, v := range indexes {
 		if v.genome != "all" {
@@ -185,9 +162,8 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			}
 		}
 	}
-	//gdb := map[string][]map[string]string{}
 	for g, v := range gs {
-		log.Println("Loading Genome ", g)
+		log.Println("Loading genome", g)
 		m.gdb[g] = []map[string]string{}
 		for _, v0 := range v {
 			err := m.loadIndex(v0, router)
@@ -198,7 +174,6 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 			}
 		}
 	}
-	//TODO ADD REFRESH ADD OR RM SHEETS
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
 		e, _ := json.Marshal(m.entry)
 
@@ -219,8 +194,6 @@ func (m *Loader) loadIndexesTo(indexes []dataIndex, router *mux.Router) error {
 		w.Write(e)
 	})
 
-	/* FIX GENOME NOT EXISTS */
-	/* TODO */
 	router.HandleFunc("/{genome}/ls", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		k := vars["genome"]
@@ -264,12 +237,6 @@ func (m *Loader) LoadWorkbook(wb *SimpleWorkbook, router *mux.Router) error {
 	return m.loadIndexesTo(indexes, router)
 }
 
-/*
-func LoadIndexTo(index dataIndex, router *mux.Router) error {
-	return loadIndex(index, router)
-}
-*/
-
 /* serve: Add DataRouter to Router
  */
 func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
@@ -297,10 +264,6 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 	return err
 }
 
-/* TODO load Data With
-Change Data into map[string]interface{}
-For all Factories
-*/
 func (m *Loader) loadData(dbname string, data interface{}, format string) (DataRouter, error) {
 	f := m.Factory(dbname, data, format)
 	if f == nil {
