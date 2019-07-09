@@ -1,7 +1,6 @@
 package data
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -66,7 +65,6 @@ func parseXls(uri string) ([]dataIndex, error) {
 	for _, row := range idxRows[1:] {
 		a := &item{}
 		row.ReadStruct(a)
-		fmt.Println(a)
 		if a == nil {
 			continue
 		}
@@ -77,7 +75,6 @@ func parseXls(uri string) ([]dataIndex, error) {
 			continue
 		}
 		if vsheet, ok := xlFile.Sheet[a.Id]; ok {
-			log.Println(a.Id)
 			format := a.Type
 			k := a.Id
 			g := a.Genome
@@ -111,7 +108,6 @@ func parseXls(uri string) ([]dataIndex, error) {
 				if err != nil {
 					nc = colNameToNumber(a.Ns)
 				}
-				log.Println(nc, vc)
 				if len(vcs) == 1 {
 					for _, r := range vsheet.Rows[1:] {
 						id := r.Cells[nc-1].String()
