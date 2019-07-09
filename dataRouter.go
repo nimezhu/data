@@ -252,7 +252,7 @@ func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 			log.Println(err)
 		}
 	} else {
-		log.Println("  Loadng sheet", index.dbname) //TODO double name
+		log.Println("  Loading sheet", index.dbname) //TODO double name
 		r, err := m.loadData(index.dbname, index.data, index.format)
 		if err == nil {
 			m.Data[index.dbname] = r //TODO double name
