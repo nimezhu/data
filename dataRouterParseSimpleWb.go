@@ -29,7 +29,6 @@ func ParseSimpleWb(xlFile *SimpleWorkbook) ([]dataIndex, error) {
 	httpP, _ := regexp.Compile("^http://")
 	httpsP, _ := regexp.Compile("^https://")
 
-	//..TODO preserver
 	type item struct {
 		Genome string `xlsx:"0"`
 		Id     string `xlsx:"1"`
@@ -62,7 +61,6 @@ func ParseSimpleWb(xlFile *SimpleWorkbook) ([]dataIndex, error) {
 			continue
 		}
 		if vsheet, ok := xlFile.Sheets[a.Id]; ok {
-			log.Println("TO Process", a)
 			format := a.Type
 			k := a.Id
 			g := a.Genome
@@ -93,7 +91,6 @@ func ParseSimpleWb(xlFile *SimpleWorkbook) ([]dataIndex, error) {
 				if err != nil {
 					nc = colNameToNumber(a.Ns)
 				}
-				log.Println(nc, vc)
 				if len(vcs) == 1 {
 					for _, r := range vsheet[1:] {
 						id := r[nc-1]
