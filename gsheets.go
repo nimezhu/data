@@ -124,7 +124,7 @@ func _readSheetToStringMap(id string, srv *sheets.Service, spreadsheetId string,
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet. %v", err)
 	}
-	log.Println("Reading ", id)
+	//log.Println("Reading ", id)
 	r := make(map[string]string)
 	if len(resp.Values) > 0 {
 		for _, row := range resp.Values {
