@@ -56,7 +56,6 @@ func addHicsHandle(router *mux.Router, hicMap map[string]*HiC) {
 
 		params := mux.Vars(r)
 		id := params["id"]
-		log.Println(id)
 		units := hicMap[id].Footer.Units
 		a := []int{}
 		for k, _ := range units {
@@ -64,7 +63,7 @@ func addHicsHandle(router *mux.Router, hicMap map[string]*HiC) {
 		}
 		jsonUnits, err := json.Marshal(a)
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
 		}
 		w.Write(jsonUnits)
 	})
@@ -75,7 +74,7 @@ func addHicsHandle(router *mux.Router, hicMap map[string]*HiC) {
 		bpres := hicMap[id].BpRes
 		jsonBpres, err := json.Marshal(bpres)
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
 		}
 		w.Write(jsonBpres)
 	})
