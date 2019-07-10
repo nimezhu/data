@@ -11,17 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/*  Implement
-type DataManager interface {
- AddURI(uri string, key string) error
- Del(string) error
- ServeTo(*mux.Router)
- List() []string
- Get(string) (string, bool)
- Move(key1 string, key2 string) bool
-}
-*/
-
 type TabixManager struct {
 	uriMap  map[string]string
 	dataMap map[string]*bix.Bix

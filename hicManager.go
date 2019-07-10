@@ -11,7 +11,6 @@ import (
 	"github.com/nimezhu/netio"
 )
 
-/*HicManager implement DataManager Inteface */
 type HicManager struct {
 	uriMap   map[string]string
 	dataMap  map[string]*hic.HiC

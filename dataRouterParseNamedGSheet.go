@@ -21,8 +21,6 @@ func parseNamedGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 	ctx := context.Background()
 
 	b, err := Asset("client_secret.json")
-	//TODO any json which allow access gsheet.
-	//b, err := ioutil.ReadFile(clientSecretJson)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}

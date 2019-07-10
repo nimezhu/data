@@ -15,17 +15,6 @@ import (
 	"github.com/nimezhu/netio"
 )
 
-/*  Implement
-type DataManager interface {
- AddURI(uri string, key string) error
- Del(string) error
- ServeTo(*mux.Router)
- List() []string
- Get(string) (string, bool)
- Move(key1 string, key2 string) bool
-}
-*/
-
 type BigBedManager struct {
 	uriMap    map[string]string
 	dataMap   map[string]*bbi.BigBedReader
@@ -33,16 +22,6 @@ type BigBedManager struct {
 	indexRoot string
 	valueMap  map[string]map[string]interface{}
 }
-
-/*
-func (m *BigBedManager) checkUri(uri string) (string, int) {
-	return checkUri(uri, m.indexRoot)
-}
-
-func (m *BigBedManager) SaveIdx(uri string) (int, error) {
-	return saveIdx(uri, m.indexRoot)
-}
-*/
 
 func (m *BigBedManager) readBw(uri string) (*bbi.BigBedReader, error) {
 	reader, err := netio.NewReadSeeker(uri)

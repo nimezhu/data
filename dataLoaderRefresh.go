@@ -25,7 +25,6 @@ func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 		}
 		/* Update New */
 		for k, v := range newdata {
-			// add case v.(type) here
 			switch v.(type) {
 			case string:
 				v0 := v.(string)
@@ -39,20 +38,16 @@ func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 				//TODO
 				v0 := v.(map[string]interface{})
 				if v1, ok := newr.GetAttr(k); !ok {
-					/* ADD NEW ENTRY */
 					if uri, ok := v0["uri"]; ok {
 						newr.AddURI(uri.(string), k)
 						newr.SetAttr(k, v0)
 					}
 				} else {
-					/* UPDATE ENTRY */
 					if uri, ok := v0["uri"]; ok {
 						if olduri, ok := v1["uri"].(string); ok {
-							/* ONLY UPDATE ATTRS */
 							if olduri == uri.(string) {
 								newr.SetAttr(k, v0)
 							} else {
-								/* UPDATE DATA URI */
 								newr.Del(k)
 								newr.AddURI(uri.(string), k)
 								newr.SetAttr(k, v0)
@@ -65,7 +60,6 @@ func (e *Loader) Refresh(dbname string, data interface{}, format string) error {
 			}
 
 		}
-		//TODO RERFESH jdata entry and gdb
 		log.Println("refresh done")
 	} else {
 		log.Println("not found db", dbname)

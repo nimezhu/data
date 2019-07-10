@@ -44,18 +44,6 @@ func InitCytoBandManager(id string) *CytoBandManager {
 	return m
 }
 
-/*
-type DataManager interface {
-	AddURI(uri string, key string) error
-	Del(string) error
-	ServeTo(*mux.Router)
-	List() []string
-	Get(string) (string, bool)
-	Move(key1 string, key2 string) bool
-}
- Add(key string) -> AddURI
-*/
-
 func parseCytoBand(txt string) (CytoBand, error) {
 	lines := strings.Split(txt, "\n")
 	cytoband := CytoBand{}

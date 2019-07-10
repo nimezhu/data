@@ -21,7 +21,6 @@ type dataIndex struct {
 	format string      `json:"format"`
 }
 
-/*middleware*/
 func (m *Loader) AddDataMiddleware(uri string, h http.Handler) http.Handler {
 	router := mux.NewRouter()
 	m.Load(uri, router)
@@ -100,11 +99,9 @@ func smartCheckSheetHeader(uri string) {
 
 }
 
-/* TODO Smart Detect Named GSheet or Named Xls*/
 func (m *Loader) smartParseURI(uri string) ([]dataIndex, error) {
 	http, _ := regexp.Compile("^http://")
 	https, _ := regexp.Compile("^https://")
-	//Add Smart Quick Read Headers Analysis
 	if len(uri) == len("1DEvA94QkN1KZQT51IYOOcIvGL2Ux7Qwqe5IpE9Pe1N8") { //GOOGLE SHEET ID ?
 		if _, err := os.Stat(uri); os.IsNotExist(err) {
 			if !http.MatchString(uri) && !https.MatchString(uri) {
@@ -237,8 +234,6 @@ func (m *Loader) LoadWorkbook(wb *SimpleWorkbook, router *mux.Router) error {
 	return m.loadIndexesTo(indexes, router)
 }
 
-/* serve: Add DataRouter to Router
- */
 func (m *Loader) loadIndex(index dataIndex, router *mux.Router) error {
 	var err error
 	if index.genome != "all" {

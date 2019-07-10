@@ -14,14 +14,6 @@ import (
 
 func addHicsHandle(router *mux.Router, hicMap map[string]*HiC) {
 	router.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
-
-		/*
-		   io.WriteString(w, "Idx\tName\tLength\n")
-		   for i, v := range hic.Chr {
-		     s := fmt.Sprintf("%d\t%s\t%d\n", i, v.Name, v.Length)
-		     io.WriteString(w, s)
-		   }
-		*/
 		keys := []string{}
 		for key, _ := range hicMap {
 			keys = append(keys, key)
@@ -31,14 +23,6 @@ func addHicsHandle(router *mux.Router, hicMap map[string]*HiC) {
 	})
 
 	router.HandleFunc("/{id}/list", func(w http.ResponseWriter, r *http.Request) {
-
-		/*
-		   io.WriteString(w, "Idx\tName\tLength\n")
-		   for i, v := range hic.Chr {
-		     s := fmt.Sprintf("%d\t%s\t%d\n", i, v.Name, v.Length)
-		     io.WriteString(w, s)
-		   }
-		*/
 		params := mux.Vars(r)
 		id := params["id"]
 		jsonChr, _ := json.Marshal(hicMap[id].Chr)

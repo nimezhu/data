@@ -13,17 +13,6 @@ import (
 	"github.com/nimezhu/netio"
 )
 
-/*
-func (m *BigWigManager) checkUri(uri string) (string, int) {
-	return checkUri(uri, m.indexRoot)
-}
-
-
-func (m *BigWigManager) SaveIdx(uri string) (int, error) {
-	return saveIdx(uri, m.indexRoot)
-}
-*/
-
 func (m *BigWigManager) readBw(uri string) (*bbi.BigWigReader, error) {
 	reader, err := netio.NewReadSeeker(uri)
 	checkErr(err)
@@ -59,9 +48,6 @@ func (m *BigWigManager) readBw(uri string) (*bbi.BigWigReader, error) {
 	return bw, nil
 }
 
-/* BigWigManager implement DataManager Inteface
- * with buffered system
- */
 type BigWigManager struct {
 	uriMap    map[string]string
 	bwMap     map[string]*bbi.BigWigReader

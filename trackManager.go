@@ -11,17 +11,6 @@ import (
 	"github.com/nimezhu/indexed"
 )
 
-/*
-type DataManager interface {
-	AddURI(uri string, key string) error
-	Del(string) error
-	ServeTo(*mux.Router)
-	List() []string
-	Get(string) (string, bool)
-	Move(key1 string, key2 string) bool
-}
-*/
-/* TrackManager supports bigbed bigwig and hic , tabixImage */
 type TrackManager struct {
 	id        string
 	uriMap    map[string]string
