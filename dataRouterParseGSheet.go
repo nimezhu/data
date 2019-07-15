@@ -82,7 +82,6 @@ func parseGSheet(spreadsheetId string, dir string) ([]dataIndex, error) {
 							log.Println("WARNING!!! cannot reading", uri, id)
 						}
 					}
-
 				}
 			}
 		} else { //Vc columns > 1

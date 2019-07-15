@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -40,6 +41,7 @@ func (T *TabixManager) AddURI(uri string, key string) error {
 	}
 	T.uriMap[key] = uri
 	T.dataMap[key] = b
+	log.Println("    Loading entry", key)
 	return nil
 }
 func (m *TabixManager) Del(key string) error {
@@ -141,5 +143,16 @@ func NewTabixManager(uri string, dbname string) *TabixManager {
 		dbname,
 	}
 	//m.ServeTo(router)
+	return &m
+}
+
+func InitTabixManager(dbname string) *TabixManager {
+	uriMap := make(map[string]string)
+	dataMap := make(map[string]*bix.Bix)
+	m := TabixManager{
+		uriMap,
+		dataMap,
+		dbname,
+	}
 	return &m
 }

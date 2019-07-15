@@ -19,9 +19,10 @@ type Loader struct {
 
 var (
 	loaders = map[string]func(string, interface{}) (DataRouter, error){
-		"file": _fileLoader,
-		"hic":  _hicLoader,
-		"map":  _mapLoader,
+		"file":  _fileLoader,
+		"hic":   _hicLoader,
+		"map":   _mapLoader,
+		"tabix": _tabixLoader,
 	}
 )
 
@@ -189,7 +190,13 @@ func _tabixLoader(dbname string, data interface{}) (DataRouter, error) {
 		log.Printf("unexpected type %T\n", v)
 		return nil, errors.New(fmt.Sprintf("tabix format not support type %T", v))
 	case string:
-		return NewTabixManager(data.(string), dbname), nil
+		return NewTabixManager(data.(string), dbname), nil //TODO
+	case map[string]interface{}:
+		a := InitTabixManager(dbname)
+		for key, val := range data.(map[string]interface{}) {
+			a.AddURI(val.(string), key)
+		}
+		return a, nil
 	}
 }
 
