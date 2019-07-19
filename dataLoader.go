@@ -194,8 +194,18 @@ func _tabixLoader(dbname string, data interface{}) (DataRouter, error) {
 	case map[string]interface{}:
 		a := InitTabixManager(dbname)
 		for key, val := range data.(map[string]interface{}) {
-			a.AddURI(val.(string), key)
+			switch val.(type) {
+			case string:
+				a.AddURI(val.(string), key)
+				a.SetAttr(key, map[string]interface{}{"uri": val})
+			case map[string]interface{}:
+				if uri, ok := val.(map[string]interface{})["uri"]; ok {
+					a.AddURI(uri.(string), key)
+					a.SetAttr(key, val.(map[string]interface{}))
+				}
+			}
 		}
+
 		return a, nil
 	}
 }

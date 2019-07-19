@@ -13,9 +13,10 @@ import (
 )
 
 type TabixManager struct {
-	uriMap  map[string]string
-	dataMap map[string]*bix.Bix
-	dbname  string
+	uriMap   map[string]string
+	dataMap  map[string]*bix.Bix
+	dbname   string
+	valueMap map[string]map[string]interface{} //LONG LABELS
 }
 
 type loc struct {
@@ -33,7 +34,14 @@ func (s loc) Start() uint32 {
 func (s loc) End() uint32 {
 	return uint32(s.end)
 }
-
+func (m *TabixManager) SetAttr(key string, value map[string]interface{}) error {
+	m.valueMap[key] = value
+	return nil
+}
+func (m *TabixManager) GetAttr(key string) (map[string]interface{}, bool) {
+	v, ok := m.valueMap[key]
+	return v, ok
+}
 func (T *TabixManager) AddURI(uri string, key string) error {
 	b, err := bix.New(uri) //path to file now; not working for http
 	if err != nil {
@@ -85,10 +93,17 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 		w.Write(jsonHic)
 	})
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
+		attr, ok := r.URL.Query()["attr"]
 
-		jsonHic, _ := json.Marshal(T.uriMap)
-		w.Write(jsonHic)
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			jsonHic, _ := json.Marshal(T.uriMap)
+			w.Write(jsonHic)
+		} else {
+			jsonAttr, _ := json.Marshal(T.valueMap)
+			w.Write(jsonAttr)
+		}
 	})
+
 	router.HandleFunc(prefix+"/{id}/list", func(w http.ResponseWriter, r *http.Request) {
 
 		params := mux.Vars(r)
@@ -126,7 +141,7 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 func NewTabixManager(uri string, dbname string) *TabixManager {
 	uriMap := loadURI(uri)
 	dataMap := make(map[string]*bix.Bix)
-	//dataList := []string{}
+	valueMap := make(map[string]map[string]interface{})
 	for k, v := range uriMap {
 		b, err := bix.New(v)
 		if err == nil {
@@ -135,12 +150,12 @@ func NewTabixManager(uri string, dbname string) *TabixManager {
 		} else {
 			panic(err)
 		}
-		//dataList = append(dataList, k)
 	}
 	m := TabixManager{
 		uriMap,
 		dataMap,
 		dbname,
+		valueMap,
 	}
 	//m.ServeTo(router)
 	return &m
@@ -149,10 +164,12 @@ func NewTabixManager(uri string, dbname string) *TabixManager {
 func InitTabixManager(dbname string) *TabixManager {
 	uriMap := make(map[string]string)
 	dataMap := make(map[string]*bix.Bix)
+	valueMap := make(map[string]map[string]interface{})
 	m := TabixManager{
 		uriMap,
 		dataMap,
 		dbname,
+		valueMap,
 	}
 	return &m
 }
