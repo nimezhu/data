@@ -84,14 +84,36 @@ func (m *TabixManager) List() []string {
 func (T *TabixManager) ServeTo(router *mux.Router) {
 	prefix := "/" + T.dbname
 	router.HandleFunc(prefix+"/list", func(w http.ResponseWriter, r *http.Request) {
+		a := make([]map[string]string, 0)
+		attr, ok := r.URL.Query()["attr"]
+		if !ok || len(attr) < 1 || !(attr[0] == "1" || attr[0] == "true") {
+			keys := []string{}
+			for key, _ := range T.uriMap {
+				keys = append(keys, key)
+			}
+			jsonHic, _ := json.Marshal(keys)
+			w.Write(jsonHic)
 
-		keys := []string{}
-		for key, _ := range T.uriMap {
-			keys = append(keys, key)
+		} else {
+			for k, _ := range T.uriMap {
+				a = append(a, map[string]string{})
+				if attrs, ok := T.GetAttr(k); ok {
+					i := len(a) - 1
+					for k0, v0 := range attrs {
+						switch v0.(type) {
+						case string:
+							a[i][k0] = v0.(string)
+						default:
+						}
+					}
+				}
+			}
+			jsonHic, _ := json.Marshal(a)
+			w.Write(jsonHic)
 		}
-		jsonHic, _ := json.Marshal(keys)
-		w.Write(jsonHic)
+
 	})
+
 	router.HandleFunc(prefix+"/ls", func(w http.ResponseWriter, r *http.Request) {
 		attr, ok := r.URL.Query()["attr"]
 
