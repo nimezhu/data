@@ -96,7 +96,7 @@ func (T *TabixManager) ServeTo(router *mux.Router) {
 
 		} else {
 			for k, _ := range T.uriMap {
-				a = append(a, map[string]string{})
+				a = append(a, map[string]string{"id": k, "format": "tabix"})
 				if attrs, ok := T.GetAttr(k); ok {
 					i := len(a) - 1
 					for k0, v0 := range attrs {

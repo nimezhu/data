@@ -177,10 +177,14 @@ func (m *BigBedManager) ServeTo(router *mux.Router) {
 		chrom := params["chr"]
 		s, _ := strconv.Atoi(params["start"])
 		e, _ := strconv.Atoi(params["end"])
-		vals, _ := m.dataMap[id].QueryRaw(chrom, s, e)
-		for v := range vals {
-			io.WriteString(w, m.dataMap[id].Format(v))
-			io.WriteString(w, "\n")
+		vals, err := m.dataMap[id].QueryRaw(chrom, s, e)
+		if err == nil {
+			for v := range vals {
+				io.WriteString(w, m.dataMap[id].Format(v))
+				io.WriteString(w, "\n")
+			}
+		} else {
+			io.WriteString(w, "")
 		}
 	})
 
