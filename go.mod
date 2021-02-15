@@ -14,9 +14,9 @@ require (
 	github.com/gonum/lapack v0.0.0-20181123203213-e4cdc5a0bff9 // indirect
 	github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9
 	github.com/gorilla/mux v1.7.4
-	github.com/nimezhu/asheets v0.0.0-20190709144639-bf671d6839d4
+	github.com/nimezhu/asheets v0.0.1
 	github.com/nimezhu/genomedb v0.0.0-20171213193052-ac8125365d5b
-	github.com/nimezhu/indexed v0.0.0-20190418171824-48f9e720b557
+	github.com/nimezhu/indexed v0.0.1
 	github.com/nimezhu/netio v0.0.0-20181023140452-2c1d703652df
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tealeg/xlsx v1.0.5
