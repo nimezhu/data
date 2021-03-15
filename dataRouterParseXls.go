@@ -33,24 +33,19 @@ func parseXls(uri string) ([]dataIndex, error) {
 	if !ok {
 
 	}
-	//cfgRows := config.Rows
+	cfgRows := config.Rows
 	var root string
-	config.RemoveRowAtIndex(0)
-	config.ForEachRow(func(row *xlsx.Row) error {
-		name := row.GetCell(0)
-		if name.String() == "root" {
-			root = row.GetCell(1).String()
+	for _, row := range cfgRows[1:] {
+		x := row.Cells
+		if x[0].String() == "root" {
+			root = x[1].String()
 		}
-		return nil
-	})
-	/*
-		for _, row := range cfgRows[1:] {
-		}
-	*/
+	}
 	index, ok := xlFile.Sheet["Index"]
 	if !ok {
 		log.Println("can not find Index sheet")
 	}
+	idxRows := index.Rows
 	type item struct {
 		Genome   string `xlsx:"0"`
 		Id       string `xlsx:"1"`
@@ -67,19 +62,17 @@ func parseXls(uri string) ([]dataIndex, error) {
 		Vc       []int
 		Preserve bool
 	}
-	//for _, row := range idxRows[1:] {
-	index.RemoveRowAtIndex(0)
-	index.ForEachRow(func(row *xlsx.Row) error {
+	for _, row := range idxRows[1:] {
 		a := &item{}
 		row.ReadStruct(a)
 		if a == nil {
-			return nil
+			continue
 		}
 		if len(a.Id) == 0 {
-			return nil
+			break
 		}
 		if a.Id[0] == '#' {
-			return nil
+			continue
 		}
 		if vsheet, ok := xlFile.Sheet[a.Id]; ok {
 			format := a.Type
@@ -97,17 +90,14 @@ func parseXls(uri string) ([]dataIndex, error) {
 					nc = colNameToNumber(a.Ns)
 				}
 				//TODO vsheet.Rows[0] as Header
-				vsheet.RemoveRowAtIndex(0)
-
-				//for _, r := range vsheet.Rows[1:] {
-				vsheet.ForEachRow(func(r *xlsx.Row) error {
-					v0 := r.GetCell(vc - 1).String()
-					k0 := r.GetCell(nc - 1).String()
+				for _, r := range vsheet.Rows[1:] {
+					//v0 := r.Cells[a.Vc-1].String() //TODO vc is ints
+					v0 := r.Cells[vc-1].String()
+					k0 := r.Cells[nc-1].String()
+					//m0.AddURI(v0, k0)
 					data[k0] = v0
-					return nil
 
-				})
-
+				}
 			} else {
 				vcs := strings.Split(a.Vs, ",")
 				vc, err := strconv.Atoi(vcs[0])
@@ -119,11 +109,9 @@ func parseXls(uri string) ([]dataIndex, error) {
 					nc = colNameToNumber(a.Ns)
 				}
 				if len(vcs) == 1 {
-					//for _, r := range vsheet.Rows[1:] {
-					vsheet.RemoveRowAtIndex(0)
-					vsheet.ForEachRow(func(r *xlsx.Row) error {
-						id := r.GetCell(nc - 1).String()
-						loc := r.GetCell(vc - 1).String() //TODO Vc To ints
+					for _, r := range vsheet.Rows[1:] {
+						id := r.Cells[nc-1].String()
+						loc := r.Cells[vc-1].String() //TODO Vc To ints
 						var uri string
 						if httpP.MatchString(loc) || httpsP.MatchString(loc) {
 							uri = loc
@@ -136,8 +124,7 @@ func parseXls(uri string) ([]dataIndex, error) {
 								log.Println("WARNING!!! cannot reading", uri, id)
 							}
 						}
-						return nil
-					})
+					}
 				} else {
 					vci := make([]int, len(vcs))
 					for i, k := range vcs {
@@ -148,18 +135,16 @@ func parseXls(uri string) ([]dataIndex, error) {
 						vci[i] = v
 					}
 					header := make([]string, len(vcs))
+
 					for i := 0; i < len(vcs); i++ {
-						_r, _ := vsheet.Row(0)
-						header[i] = _r.GetCell(vci[i] - 1).String()
+						header[i] = vsheet.Rows[0].Cells[vci[i]-1].String()
 					}
-					vsheet.RemoveRowAtIndex(0)
-					//for _, r := range vsheet.Rows[1:] {
-					vsheet.ForEachRow(func(r *xlsx.Row) error {
-						id := r.GetCell(nc - 1).String()
-						loc := r.GetCell(vc - 1).String()
+					for _, r := range vsheet.Rows[1:] {
+						id := r.Cells[nc-1].String()
+						loc := r.Cells[vc-1].String()
 						vals := make([]string, len(vcs))
 						for i, k := range vci {
-							vals[i] = r.GetCell(k - 1).String()
+							vals[i] = r.Cells[k-1].String()
 						}
 						var uri string
 						if httpP.MatchString(loc) || httpsP.MatchString(loc) {
@@ -173,8 +158,7 @@ func parseXls(uri string) ([]dataIndex, error) {
 								log.Println("WARNING!!! cannot reading", uri, id)
 							}
 						}
-						return nil
-					})
+					}
 				}
 			}
 			d := dataIndex{
@@ -185,7 +169,6 @@ func parseXls(uri string) ([]dataIndex, error) {
 			}
 			di = append(di, d)
 		}
-		return nil
-	})
+	}
 	return di, nil
 }
