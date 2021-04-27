@@ -82,6 +82,8 @@ github.com/nimezhu/genomedb v0.0.0-20171213193052-ac8125365d5b h1:+CuqkNDKSNp2mw
 github.com/nimezhu/genomedb v0.0.0-20171213193052-ac8125365d5b/go.mod h1:+85jdRQLPulFvHUYvBFmdCC4541mNC9J+WESIpL4Rp0=
 github.com/nimezhu/indexed v0.0.18 h1:n8V8ZcvFgOLxQXeStYYD+lwebkzA/uGnzy59r+wL/vo=
 github.com/nimezhu/indexed v0.0.18/go.mod h1:VzrXw9whuVxHyPeBwIPG2bu91arEdNqttRaWGEKvcYY=
+github.com/nimezhu/indexed v0.0.19 h1:ha/RQ3Rb/fU5dS5DQ9azvugXMFlgs7XIEjgKRsEXL+I=
+github.com/nimezhu/indexed v0.0.19/go.mod h1:VzrXw9whuVxHyPeBwIPG2bu91arEdNqttRaWGEKvcYY=
 github.com/nimezhu/netio v0.0.0-20181023140452-2c1d703652df h1:yM8Fr0jgJ/rI/hu5LTImtPMZLUXCOQmAL3k2U4m62VU=
 github.com/nimezhu/netio v0.0.0-20181023140452-2c1d703652df/go.mod h1:n8cpCndhz46Gu3fti8y7scZpMgKzkgaPPfB/NSrrXOQ=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

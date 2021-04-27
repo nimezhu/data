@@ -16,7 +16,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/nimezhu/asheets v0.0.1
 	github.com/nimezhu/genomedb v0.0.0-20171213193052-ac8125365d5b
-	github.com/nimezhu/indexed v0.0.18
+	github.com/nimezhu/indexed v0.0.19
 	github.com/nimezhu/netio v0.0.0-20181023140452-2c1d703652df
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tealeg/xlsx v1.0.5
